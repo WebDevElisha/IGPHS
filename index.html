@@ -20,8 +20,10 @@
       color: white;
       padding: 15px;
       overflow-y: auto;
-      border-radius: 20px; /* Rounded bubble look */
+      border-radius: 20px;
       margin: 10px;
+      display: flex;
+      flex-direction: column; /* Stack messages vertically */
     }
 
     #messageInput {
@@ -29,7 +31,7 @@
       padding: 12px;
       border: none;
       outline: none;
-      border-radius: 25px; /* Bubble input */
+      border-radius: 25px;
       margin-right: 10px;
       font-size: 16px;
     }
@@ -53,15 +55,16 @@
       background-color: #444;
       color: white;
       padding: 10px 15px;
-      border-radius: 20px; /* Bubble style */
+      border-radius: 20px;
       margin: 5px 0;
       max-width: 70%;
       word-wrap: break-word;
+      animation: popIn 0.3s ease-out; /* Animation */
     }
 
     .message.self {
       background-color: #28a745; /* Green bubble for your own messages */
-      align-self: flex-end;
+      align-self: flex-end; /* Push to the right */
     }
 
     .input-area {
@@ -71,13 +74,19 @@
       border-radius: 20px;
       margin: 10px;
     }
+
+    /* Bubble animation */
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
   <div id="chatbox"></div>
   <div class="input-area">
     <input type="text" id="messageInput" placeholder="Type a message...">
-    <button id="sendBtn">➤</button> <!-- Send icon -->
+    <button id="sendBtn">➤</button>
   </div>
 
   <script>
