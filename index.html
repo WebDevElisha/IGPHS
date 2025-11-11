@@ -5,7 +5,7 @@
   <title>IGPHS Chatroom</title>
   <style>
     body {
-      background-color: #1E90FF; /* Blue background */
+      background-color: #007BFF; /* Bright blue background */
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
@@ -16,44 +16,68 @@
 
     #chatbox {
       flex: 1;
-      background-color: black; /* Black message box */
+      background-color: black; /* Black message area */
       color: white;
-      padding: 10px;
+      padding: 15px;
       overflow-y: auto;
+      border-radius: 20px; /* Rounded bubble look */
+      margin: 10px;
     }
 
     #messageInput {
-      width: 80%;
-      padding: 10px;
+      flex: 1;
+      padding: 12px;
       border: none;
       outline: none;
+      border-radius: 25px; /* Bubble input */
+      margin-right: 10px;
+      font-size: 16px;
     }
 
     #sendBtn {
-      width: 20%;
-      padding: 10px;
+      padding: 12px 20px;
       border: none;
-      background-color: #333;
+      border-radius: 50%; /* Circular bubble button */
+      background-color: #28a745;
       color: white;
       cursor: pointer;
+      font-size: 18px;
     }
 
     #sendBtn:hover {
-      background-color: #555;
+      background-color: #218838;
     }
 
     .message {
+      display: inline-block;
+      background-color: #444;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 20px; /* Bubble style */
       margin: 5px 0;
-      padding: 5px;
-      border-bottom: 1px solid #444;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+
+    .message.self {
+      background-color: #28a745; /* Green bubble for your own messages */
+      align-self: flex-end;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
   <div id="chatbox"></div>
-  <div style="display:flex;">
+  <div class="input-area">
     <input type="text" id="messageInput" placeholder="Type a message...">
-    <button id="sendBtn">Send</button>
+    <button id="sendBtn">➤</button> <!-- Send icon -->
   </div>
 
   <script>
@@ -65,7 +89,7 @@
       const text = input.value.trim();
       if (text !== "") {
         const msg = document.createElement('div');
-        msg.className = 'message';
+        msg.className = 'message self';
         msg.textContent = text;
         chatbox.appendChild(msg);
         input.value = "";
