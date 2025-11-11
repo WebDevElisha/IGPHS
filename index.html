@@ -14,6 +14,30 @@
       height: 100vh;
     }
 
+    /* Header bar */
+    #header {
+      background-color: black;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #1E90FF;
+    }
+
+    #header h1 {
+      font-size: 20px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #header .status {
+      font-size: 14px;
+      color: #00FF00; /* Green dot for online */
+    }
+
     #chatbox {
       flex: 1;
       background-color: black;
@@ -93,7 +117,16 @@
   </style>
 </head>
 <body>
+  <!-- Header -->
+  <div id="header">
+    <h1>💬 IGPHS Chatroom</h1>
+    <div class="status">● online</div>
+  </div>
+
+  <!-- Chat messages -->
   <div id="chatbox"></div>
+
+  <!-- Input area -->
   <div class="input-area">
     <input type="text" id="messageInput" placeholder="Type a message...">
     <button id="sendBtn">➤</button>
@@ -104,8 +137,7 @@
     const input = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    // Temporary username (later this will come from sign-in)
-    const currentUser = "You";
+    const currentUser = "You"; // Temporary username
 
     function sendMessage(type = "self", username = currentUser) {
       const text = input.value.trim();
@@ -113,7 +145,6 @@
         const msg = document.createElement('div');
         msg.className = 'message ' + type;
 
-        // Add username above bubble
         const nameTag = document.createElement('span');
         nameTag.className = 'username';
         nameTag.textContent = username;
@@ -133,23 +164,6 @@
         sendMessage("self", currentUser);
       }
     });
-
-    // Demo: simulate another user
-    setInterval(() => {
-      const otherUser = "Alex";
-      const msg = document.createElement('div');
-      msg.className = 'message other';
-
-      const nameTag = document.createElement('span');
-      nameTag.className = 'username';
-      nameTag.textContent = otherUser;
-
-      msg.appendChild(nameTag);
-      msg.appendChild(document.createTextNode("Hey, this is Alex!"));
-
-      chatbox.appendChild(msg);
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }, 7000);
   </script>
 </body>
 </html>
