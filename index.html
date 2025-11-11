@@ -16,13 +16,13 @@
 
     #chatbox {
       flex: 1;
-      background-color: black; /* Black message area */
+      background-color: black;
       padding: 15px;
       overflow-y: auto;
       border-radius: 20px;
       margin: 10px;
       display: flex;
-      flex-direction: column; /* Stack vertically */
+      flex-direction: column;
     }
 
     #messageInput {
@@ -38,7 +38,7 @@
     #sendBtn {
       padding: 12px 20px;
       border: none;
-      border-radius: 50%; /* Circular bubble button */
+      border-radius: 50%;
       background-color: #28a745;
       color: white;
       cursor: pointer;
@@ -59,18 +59,23 @@
       animation: popIn 0.3s ease-out;
     }
 
-    /* Your own messages (green, right-aligned) */
     .message.self {
       background-color: #28a745;
       color: white;
       align-self: flex-end;
     }
 
-    /* Other people's messages (white, left-aligned) */
     .message.other {
       background-color: white;
       color: black;
       align-self: flex-start;
+    }
+
+    .username {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 3px;
+      display: block;
     }
 
     .input-area {
@@ -81,7 +86,6 @@
       margin: 10px;
     }
 
-    /* Bubble animation */
     @keyframes popIn {
       0% { transform: scale(0.8); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
@@ -100,35 +104,52 @@
     const input = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    // For now, we'll simulate "self" vs "other" messages
-    // Later, Firebase/backend will decide which is which
-    function sendMessage(type = "self") {
+    // Temporary username (later this will come from sign-in)
+    const currentUser = "You";
+
+    function sendMessage(type = "self", username = currentUser) {
       const text = input.value.trim();
       if (text !== "") {
         const msg = document.createElement('div');
         msg.className = 'message ' + type;
-        msg.textContent = text;
+
+        // Add username above bubble
+        const nameTag = document.createElement('span');
+        nameTag.className = 'username';
+        nameTag.textContent = username;
+
+        msg.appendChild(nameTag);
+        msg.appendChild(document.createTextNode(text));
+
         chatbox.appendChild(msg);
         input.value = "";
         chatbox.scrollTop = chatbox.scrollHeight;
       }
     }
 
-    sendBtn.addEventListener('click', () => sendMessage("self"));
+    sendBtn.addEventListener('click', () => sendMessage("self", currentUser));
     input.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
-        sendMessage("self");
+        sendMessage("self", currentUser);
       }
     });
 
-    // Demo: simulate receiving an "other" message every 5 seconds
+    // Demo: simulate another user
     setInterval(() => {
+      const otherUser = "Alex";
       const msg = document.createElement('div');
       msg.className = 'message other';
-      msg.textContent = "Other person’s message!";
+
+      const nameTag = document.createElement('span');
+      nameTag.className = 'username';
+      nameTag.textContent = otherUser;
+
+      msg.appendChild(nameTag);
+      msg.appendChild(document.createTextNode("Hey, this is Alex!"));
+
       chatbox.appendChild(msg);
       chatbox.scrollTop = chatbox.scrollHeight;
-    }, 5000);
+    }, 7000);
   </script>
 </body>
 </html>
