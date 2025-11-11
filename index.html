@@ -110,6 +110,14 @@
       display: block;
     }
 
+    .system-message {
+      text-align: center;
+      color: #ccc;
+      font-size: 14px;
+      margin: 10px 0;
+      animation: fadeIn 0.3s ease-out;
+    }
+
     .input-area {
       display: flex;
       padding: 10px;
@@ -118,22 +126,48 @@
       margin: 10px;
     }
 
-    #dndToggle {
+    /* Drop-up status box */
+    #statusBox {
       position: fixed;
       bottom: 10px;
-      right: 10px;
+      left: 10px;
       background-color: black;
       color: white;
       border: 1px solid #1E90FF;
       border-radius: 10px;
-      padding: 5px 10px;
       font-size: 14px;
       cursor: pointer;
+      z-index: 100;
+    }
+
+    #statusLabel {
+      padding: 8px 12px;
+    }
+
+    #statusOptions {
+      display: none;
+      flex-direction: column;
+      border-top: 1px solid #1E90FF;
+    }
+
+    .statusOption {
+      padding: 8px 12px;
+      border-top: 1px solid #333;
+      background-color: #111;
+    }
+
+    .statusOption:hover {
+      background-color: #222;
     }
 
     @keyframes popIn {
       0% { transform: scale(0.8); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
@@ -156,21 +190,30 @@
     <button id="sendBtn">➤</button>
   </div>
 
-  <!-- DND toggle -->
-  <div id="dndToggle">Status: Online</div>
+  <!-- Drop-up status box -->
+  <div id="statusBox">
+    <div id="statusLabel">Status: Online</div>
+    <div id="statusOptions">
+      <div class="statusOption" data-status="Online">Online</div>
+      <div class="statusOption" data-status="DND">Do Not Disturb</div>
+      <div class="statusOption" data-status="Offline">Offline</div>
+    </div>
+  </div>
 
   <script>
     const chatbox = document.getElementById('chatbox');
     const input = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
-    const dndToggle = document.getElementById('dndToggle');
     const statusDot = document.getElementById('statusDot');
     const onlineCount = document.getElementById('onlineCount');
+    const statusBox = document.getElementById('statusBox');
+    const statusLabel = document.getElementById('statusLabel');
+    const statusOptions = document.getElementById('statusOptions');
 
     let currentUser = prompt("Enter your username:");
     if (!currentUser) currentUser = "Anonymous";
 
-    let isDND = false;
+    let currentStatus = "Online";
 
     function sendMessage(type = "self", username = currentUser) {
       const text = input.value.trim();
@@ -191,6 +234,14 @@
       }
     }
 
+    function postSystemMessage(text) {
+      const msg = document.createElement('div');
+      msg.className = 'system-message';
+      msg.textContent = `— ${text} —`;
+      chatbox.appendChild(msg);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
     sendBtn.addEventListener('click', () => sendMessage("self", currentUser));
     input.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
@@ -198,14 +249,30 @@
       }
     });
 
-    dndToggle.addEventListener('click', () => {
-      isDND = !isDND;
-      dndToggle.textContent = isDND ? "Status: DND" : "Status: Online";
-      statusDot.style.backgroundColor = isDND ? "red" : "#00FF00";
+    statusLabel.addEventListener('click', () => {
+      statusOptions.style.display = statusOptions.style.display === "flex" ? "none" : "flex";
     });
 
-    // Placeholder: online count is always 1 for now
-    onlineCount.textContent = "1 online";
+    document.querySelectorAll('.statusOption').forEach(option => {
+      option.addEventListener('click', () => {
+        currentStatus = option.dataset.status;
+        statusLabel.textContent = `Status: ${currentStatus}`;
+        statusOptions.style.display = "none";
+
+        // Update dot color
+        if (currentStatus === "Online") statusDot.style.backgroundColor = "#00FF00";
+        else if (currentStatus === "DND") statusDot.style.backgroundColor = "red";
+        else statusDot.style.backgroundColor = "gray";
+
+        postSystemMessage(`${currentUser} has gone ${currentStatus}`);
+      });
+    });
+
+    window.addEventListener("beforeunload", () => {
+      postSystemMessage(`${currentUser} has gone offline`);
+    });
+
+    onlineCount.textContent = "1 online"; // Placeholder
   </script>
 </body>
 </html>
