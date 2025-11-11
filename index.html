@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IGPHS Chatroom</title>
+  <style>
+    body {
+      background-color: #1E90FF; /* Blue background */
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #chatbox {
+      flex: 1;
+      background-color: black; /* Black message box */
+      color: white;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    #messageInput {
+      width: 80%;
+      padding: 10px;
+      border: none;
+      outline: none;
+    }
+
+    #sendBtn {
+      width: 20%;
+      padding: 10px;
+      border: none;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+
+    #sendBtn:hover {
+      background-color: #555;
+    }
+
+    .message {
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid #444;
+    }
+  </style>
+</head>
+<body>
+  <div id="chatbox"></div>
+  <div style="display:flex;">
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <script>
+    const chatbox = document.getElementById('chatbox');
+    const input = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (text !== "") {
+        const msg = document.createElement('div');
+        msg.className = 'message';
+        msg.textContent = text;
+        chatbox.appendChild(msg);
+        input.value = "";
+        chatbox.scrollTop = chatbox.scrollHeight;
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
