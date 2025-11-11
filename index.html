@@ -17,13 +17,12 @@
     #chatbox {
       flex: 1;
       background-color: black; /* Black message area */
-      color: white;
       padding: 15px;
       overflow-y: auto;
       border-radius: 20px;
       margin: 10px;
       display: flex;
-      flex-direction: column; /* Stack messages vertically */
+      flex-direction: column; /* Stack vertically */
     }
 
     #messageInput {
@@ -52,19 +51,26 @@
 
     .message {
       display: inline-block;
-      background-color: #444;
-      color: white;
       padding: 10px 15px;
       border-radius: 20px;
       margin: 5px 0;
       max-width: 70%;
       word-wrap: break-word;
-      animation: popIn 0.3s ease-out; /* Animation */
+      animation: popIn 0.3s ease-out;
     }
 
+    /* Your own messages (green, right-aligned) */
     .message.self {
-      background-color: #28a745; /* Green bubble for your own messages */
-      align-self: flex-end; /* Push to the right */
+      background-color: #28a745;
+      color: white;
+      align-self: flex-end;
+    }
+
+    /* Other people's messages (white, left-aligned) */
+    .message.other {
+      background-color: white;
+      color: black;
+      align-self: flex-start;
     }
 
     .input-area {
@@ -94,11 +100,13 @@
     const input = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    function sendMessage() {
+    // For now, we'll simulate "self" vs "other" messages
+    // Later, Firebase/backend will decide which is which
+    function sendMessage(type = "self") {
       const text = input.value.trim();
       if (text !== "") {
         const msg = document.createElement('div');
-        msg.className = 'message self';
+        msg.className = 'message ' + type;
         msg.textContent = text;
         chatbox.appendChild(msg);
         input.value = "";
@@ -106,12 +114,21 @@
       }
     }
 
-    sendBtn.addEventListener('click', sendMessage);
+    sendBtn.addEventListener('click', () => sendMessage("self"));
     input.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
-        sendMessage();
+        sendMessage("self");
       }
     });
+
+    // Demo: simulate receiving an "other" message every 5 seconds
+    setInterval(() => {
+      const msg = document.createElement('div');
+      msg.className = 'message other';
+      msg.textContent = "Other person’s message!";
+      chatbox.appendChild(msg);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }, 5000);
   </script>
 </body>
 </html>
