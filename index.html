@@ -52,9 +52,11 @@
     .statusOption { padding:8px 12px; border-top:1px solid #333; background:#111; }
     .statusOption:hover { background:#222; }
     /* Modals */
-    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:18px; border-radius:15px; width:340px; z-index:1000; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:18px; border-radius:15px; width:360px; z-index:1000; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
     .modal h3 { margin:0 0 10px; }
     .modal input { width:100%; padding:10px; margin:6px 0; border-radius:10px; border:1px solid #ccc; }
+    .modal .row { display:flex; align-items:center; gap:10px; }
+    .modal .avatarPreview { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; background:var(--green); }
     .modal button { background:var(--blue); color:#fff; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; margin-top:10px; width:100%; font-weight:bold; }
     #overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; display:none; }
     #banner { position:fixed; top:10px; left:50%; transform:translateX(-50%); background:var(--danger); color:#fff; padding:10px 14px; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.25); font-size:14px; display:none; z-index:2000; }
@@ -90,27 +92,44 @@
     </div>
   </div>
 
+  <!-- Status drop-up -->
+  <div id="statusBox">
+    <div id="statusLabel">Status: Online</div>
+    <div id="statusOptions">
+      <div class="statusOption" data-status="Online">Online</div>
+      <div class="statusOption" data-status="DND">Do Not Disturb</div>
+      <div class="statusOption" data-status="Offline">Offline</div>
+    </div>
+  </div>
+
   <div id="overlay"></div>
 
+  <!-- Username Modal -->
   <div id="usernameModal" class="modal">
     <h3>Choose a username</h3>
-    <input type="text" id="usernameInput" placeholder="Username" />
+    <div class="row">
+      <input type="text" id="usernameInput" placeholder="Username" />
+      <div id="avatarPreview" class="avatarPreview">?</div>
+    </div>
     <input type="color" id="colorInput" value="#28a745" />
     <button id="usernameOkBtn">OK</button>
   </div>
 
+  <!-- Add Room Modal -->
   <div id="roomModal" class="modal">
     <h3>Create a private room</h3>
     <input type="text" id="newRoomInput" placeholder="Room name" />
     <button id="createRoomBtn">OK</button>
   </div>
 
+  <!-- Join Room Modal -->
   <div id="joinRoomModal" class="modal">
     <h3>Join a room (exact name)</h3>
     <input type="text" id="joinRoomInput" placeholder="Room name" />
     <button id="joinRoomConfirmBtn">OK</button>
   </div>
 
+  <!-- Settings Modal -->
   <div id="settingsModal" class="modal">
     <h3>Change username</h3>
     <input type="text" id="newUsernameInput" placeholder="New username" />
@@ -149,6 +168,7 @@
     const settingsOkBtn = document.getElementById('settingsOkBtn');
 
     const userAvatar = document.getElementById('userAvatar');
+    const avatarPreview = document.getElementById('avatarPreview');
 
     const roomListEl = document.getElementById('roomList');
     const roomNameEl = document.getElementById('roomName');
@@ -163,6 +183,7 @@
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
 
+    const statusBox = document.getElementById('statusBox');
     const statusLabel = document.getElementById('statusLabel');
     const statusOptions = document.getElementById('statusOptions');
     const statusDot = document.getElementById('statusDot');
@@ -180,11 +201,21 @@
     function hideModal(modal){ overlay.style.display='none'; modal.style.display='none'; }
     function showBanner(msg, ms=3000){ banner.textContent=msg; banner.style.display='block'; setTimeout(()=>{ banner.style.display='none'; }, ms); }
 
+    // Avatar rendering
     function renderAvatar(){
       const letter = (currentUser || '?').charAt(0).toUpperCase();
       userAvatar.style.background = userColor;
       userAvatar.textContent = letter;
+      avatarPreview.style.background = userColor;
+      avatarPreview.textContent = letter;
     }
+    usernameInput.addEventListener('input', () => {
+      const letter = (usernameInput.value || '?').charAt(0).toUpperCase();
+      avatarPreview.textContent = letter;
+    });
+    colorInput.addEventListener('input', () => {
+      avatarPreview.style.background = colorInput.value;
+    });
 
     // Rooms visibility via userRooms/{uid}/{room}
     let userRoomsRef = null;
@@ -230,7 +261,7 @@
       onDisconnect(my).remove();
     }
 
-    // Message stream with duplicate guard
+    // Messages stream with duplicate guard
     let roomMsgRef = null;
     const renderedKeys = new Map(); // room -> Set(keys)
     function resetRenderedKeysForRoom(room){ renderedKeys.set(room, new Set()); }
@@ -285,11 +316,10 @@
 
       div.appendChild(name); div.appendChild(textNode); div.appendChild(ts);
 
-      // Actions: only for your own messages
       if (isSelf){
         const actions = document.createElement('div');
         actions.className = 'msg-actions';
-        // Edit
+
         const editBtn = document.createElement('button');
         editBtn.className = 'msg-btn';
         editBtn.textContent = 'Edit';
@@ -300,7 +330,7 @@
           if (!trimmed) return;
           await update(ref(db, `rooms/${currentRoom}/messages/${key}`), { text: trimmed, editedAt: Date.now() });
         });
-        // Delete
+
         const delBtn = document.createElement('button');
         delBtn.className = 'msg-btn';
         delBtn.textContent = 'Delete';
@@ -318,7 +348,7 @@
       chatbox.appendChild(div);
     }
 
-    // Send message with debounce
+    // Sending guard
     let sending = false;
     async function sendMessage(){
       const text = messageInput.value.trim();
@@ -333,16 +363,12 @@
       }
     }
     sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter'){ e.preventDefault(); sendMessage(); }
-    });
+    messageInput.addEventListener('keypress', e => { if (e.key === 'Enter'){ e.preventDefault(); sendMessage(); } });
 
-    // System message helper
     function postSystemMessage(room, text){
       push(ref(db, `rooms/${room}/messages`), { type:'system', text, timestamp: Date.now() });
     }
 
-    // Create private room (visible only to creator until shared)
     async function createRoomByName(roomName){
       const name = (roomName || '').trim();
       if (!name) return;
@@ -352,7 +378,6 @@
       switchRoom(name);
     }
 
-    // Join room by exact name: must exist; if not, show banner and do nothing
     async function joinRoomByName(roomName){
       const name = (roomName || '').trim();
       if (!name) return;
@@ -368,10 +393,7 @@
       switchRoom(name);
     }
 
-    // Status control
-    const statusBox = document.getElementById('statusBox');
-    const statusOptions = document.getElementById('statusOptions');
-    const statusLabel = document.getElementById('statusLabel');
+    // Status
     statusLabel.addEventListener('click', ()=> {
       statusOptions.style.display = statusOptions.style.display === 'flex' ? 'none' : 'flex';
     });
@@ -418,7 +440,7 @@
       if (name) joinRoomByName(name);
     });
 
-    // Settings gear: change username, broadcast rename
+    // Settings gear: change username
     settingsGear.addEventListener('click', ()=>{
       newUsernameInput.value = '';
       showModal(settingsModal);
@@ -439,6 +461,9 @@
     // Username setup
     function openUsernameModalIfNeeded(){
       if (!currentUser){
+        usernameInput.value = '';
+        avatarPreview.style.background = userColor;
+        avatarPreview.textContent = '?';
         showModal(usernameModal);
         usernameInput.focus();
       } else {
@@ -480,7 +505,7 @@
       attachRoomListener(currentRoom);
     })();
 
-    window.addEventListener('beforeunload', ()=>{ /* onDisconnect handles presence removal */ });
+    window.addEventListener('beforeunload', ()=>{ /* presence cleanup via onDisconnect */ });
   </script>
 </body>
 </html>
