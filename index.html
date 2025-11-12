@@ -12,7 +12,6 @@
       --bg: #000;
       --text: #fff;
     }
-
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -21,10 +20,9 @@
       height: 100vh;
       overflow: hidden;
     }
-
     /* Sidebar */
     #sidebar {
-      width: 240px;
+      width: 260px;
       background-color: var(--bg);
       color: var(--text);
       display: flex;
@@ -44,10 +42,17 @@
       border-radius: 10px;
       cursor: pointer;
       user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .room.active { background-color: var(--accent); color: var(--text); }
     .room:hover { background-color: #333; }
-
+    .room .privateTag {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-left: 8px;
+    }
     #addRoomBtn, #joinRoomBtn {
       margin-top: 6px;
       padding: 10px;
@@ -77,9 +82,24 @@
       align-items: center;
       gap: 12px;
     }
+    #roomTitle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     #roomName {
       font-weight: bold;
       letter-spacing: 0.5px;
+    }
+    #onlineStatus {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    #statusDot {
+      width: 10px; height: 10px; border-radius: 50%; background: #00FF00;
     }
     #userAvatar {
       width: 32px;
@@ -171,6 +191,31 @@
       cursor: pointer;
     }
 
+    /* Status drop-up bottom-left */
+    #statusBox {
+      position: fixed;
+      bottom: 10px; left: 10px;
+      background-color: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 100;
+    }
+    #statusLabel { padding: 8px 12px; }
+    #statusOptions {
+      display: none;
+      flex-direction: column;
+      border-top: 1px solid var(--accent);
+    }
+    .statusOption {
+      padding: 8px 12px;
+      border-top: 1px solid #333;
+      background-color: #111;
+    }
+    .statusOption:hover { background-color: #222; }
+
     /* Modals */
     .modal {
       position: fixed;
@@ -179,7 +224,7 @@
       background: #fff;
       padding: 18px;
       border-radius: 15px;
-      width: 320px; /* ~10% visual footprint */
+      width: 340px;
       z-index: 1000;
       display: none;
       box-shadow: 0 10px 30px rgba(0,0,0,0.4);
@@ -193,6 +238,13 @@
       border: 1px solid #ccc;
       font-size: 14px;
       box-sizing: border-box;
+    }
+    .modal .row { display: flex; align-items: center; gap: 10px; }
+    .modal .avatarPreview {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: bold; background: var(--green);
     }
     .modal button {
       background-color: var(--blue);
@@ -234,7 +286,10 @@
 
   <div id="main">
     <div id="chatHeader">
-      <div id="roomName">general</div>
+      <div id="roomTitle">
+        <div id="roomName">General</div>
+        <div id="onlineStatus"><div id="statusDot"></div><span id="onlineCount">0 online</span></div>
+      </div>
       <div id="userAvatar">?</div>
     </div>
     <div id="chatbox"></div>
@@ -244,13 +299,26 @@
     </div>
   </div>
 
+  <!-- Status drop-up -->
+  <div id="statusBox">
+    <div id="statusLabel">Status: Online</div>
+    <div id="statusOptions">
+      <div class="statusOption" data-status="Online">Online</div>
+      <div class="statusOption" data-status="DND">Do Not Disturb</div>
+      <div class="statusOption" data-status="Offline">Offline</div>
+    </div>
+  </div>
+
   <!-- Overlay -->
   <div id="overlay"></div>
 
   <!-- Username Modal -->
   <div id="usernameModal" class="modal">
     <h3>Choose a username</h3>
-    <input type="text" id="usernameInput" placeholder="Username" />
+    <div class="row">
+      <input type="text" id="usernameInput" placeholder="Username" />
+      <div id="avatarPreview" class="avatarPreview">?</div>
+    </div>
     <input type="color" id="colorInput" value="#28a745" />
     <button id="usernameOkBtn">OK</button>
   </div>
@@ -264,7 +332,7 @@
 
   <!-- Join Room Modal -->
   <div id="joinRoomModal" class="modal">
-    <h3>Join a room</h3>
+    <h3>Join a room (exact name)</h3>
     <input type="text" id="joinRoomInput" placeholder="Room name" />
     <button id="joinRoomConfirmBtn">OK</button>
   </div>
@@ -272,7 +340,7 @@
   <script type="module">
     // Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+    import { getDatabase, ref, set, push, onChildAdded, onValue, serverTimestamp, update, onDisconnect } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCgkxFC2qZSTWTHfl8OgjYBNaN0rfYjaQU",
@@ -294,6 +362,7 @@
     const usernameInput = document.getElementById('usernameInput');
     const colorInput = document.getElementById('colorInput');
     const usernameOkBtn = document.getElementById('usernameOkBtn');
+    const avatarPreview = document.getElementById('avatarPreview');
     const userAvatar = document.getElementById('userAvatar');
 
     const roomListEl = document.getElementById('roomList');
@@ -309,11 +378,24 @@
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    // Local state
+    const statusBox = document.getElementById('statusBox');
+    const statusLabel = document.getElementById('statusLabel');
+    const statusOptions = document.getElementById('statusOptions');
+    const statusDot = document.getElementById('statusDot');
+    const onlineCountEl = document.getElementById('onlineCount');
+
+    // Local identity
+    let uid = localStorage.getItem('uid');
+    if (!uid) {
+      uid = 'u_' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem('uid', uid);
+    }
     let currentUser = localStorage.getItem('username') || null;
     let userColor = localStorage.getItem('userColor') || '#28a745';
-    let currentRoom = localStorage.getItem('currentRoom') || 'general';
-    let rooms = JSON.parse(localStorage.getItem('rooms') || '["general"]');
+    let currentStatus = 'Online';
+
+    // Rooms the user can see (General by default)
+    let currentRoom = localStorage.getItem('currentRoom') || 'General';
 
     // Modal helpers
     function showModal(modal) {
@@ -331,46 +413,86 @@
       userAvatar.style.background = userColor;
       userAvatar.textContent = letter;
     }
+    usernameInput.addEventListener('input', () => {
+      avatarPreview.textContent = (usernameInput.value || '?').charAt(0).toUpperCase();
+    });
+    colorInput.addEventListener('input', () => {
+      avatarPreview.style.background = colorInput.value;
+    });
 
-    // Rooms UI
+    // Rooms visibility model:
+    // userRooms/{uid}/{roomName}: true  -> what appears in the user's sidebar
+    // rooms/{roomName}: { owner, isPrivate, createdAt }
+    // messages under rooms/{roomName}/messages
     function renderRoomList() {
       roomListEl.innerHTML = '';
-      rooms.forEach(room => {
-        const div = document.createElement('div');
-        div.className = 'room' + (room === currentRoom ? ' active' : '');
-        div.textContent = room;
-        div.dataset.room = room;
-        div.addEventListener('click', () => switchRoom(room));
-        roomListEl.appendChild(div);
+      const userRoomsRef = ref(db, `userRooms/${uid}`);
+      onValue(userRoomsRef, (snap) => {
+        const roomsObj = snap.val() || {};
+        const roomNames = Object.keys(roomsObj);
+        roomNames.sort((a,b) => a.localeCompare(b));
+        roomListEl.innerHTML = '';
+        roomNames.forEach(room => {
+          const div = document.createElement('div');
+          div.className = 'room' + (room === currentRoom ? ' active' : '');
+          const label = document.createElement('span');
+          label.textContent = room;
+          const privTag = document.createElement('span');
+          privTag.className = 'privateTag';
+          privTag.textContent = roomsObj[room].private ? '(private)' : '';
+          div.appendChild(label);
+          div.appendChild(privTag);
+          div.dataset.room = room;
+          div.addEventListener('click', () => switchRoom(room));
+          roomListEl.appendChild(div);
+        });
+        // Ensure General is present
+        if (!roomsObj['General']) {
+          // Seed General in userRooms
+          set(ref(db, `userRooms/${uid}/General`), { private: false });
+        }
       });
     }
 
-    // Firebase listener map to detach/reattach on room switch
-    let detachListener = null;
+    // Presence: presence/{room}/{uid} = { status, username, ts }
+    let presenceDetach = null;
+    function attachPresence(room) {
+      // Count online (status Online or DND)
+      const presRef = ref(db, `presence/${room}`);
+      onValue(presRef, (snap) => {
+        const pres = snap.val() || {};
+        const count = Object.values(pres).filter(p => p && (p.status === 'Online' || p.status === 'DND')).length;
+        onlineCountEl.textContent = `${count} online`;
+      });
+      // Set my presence
+      const myPresRef = ref(db, `presence/${room}/${uid}`);
+      set(myPresRef, { status: currentStatus, username: currentUser || 'Anonymous', ts: Date.now() });
+      onDisconnect(myPresRef).remove();
+    }
+
+    // Room listener (messages)
+    let messagesListener = null;
     function attachRoomListener(room) {
-      if (detachListener) detachListener(); // simple detach (we’ll override below)
       chatbox.innerHTML = '';
+      roomNameEl.textContent = room;
+      // Detach old: onChildAdded doesn't provide direct off in CDN; rely on unique ref path per room
       const roomRef = ref(db, `rooms/${room}/messages`);
-      const unsub = onChildAdded(roomRef, (snap) => {
+      messagesListener = onChildAdded(roomRef, (snap) => {
         const msg = snap.val();
         renderMessage(msg);
         chatbox.scrollTop = chatbox.scrollHeight;
       });
-      // Store a function to clear chat and noop; Realtime DB returns no direct unsubscribe,
-      // but re-attaching simply adds another handler. We prevent dupes by clearing UI before attach.
-      detachListener = () => { /* noop for CDN build */ };
+      attachPresence(room);
     }
 
     // Switch room
     function switchRoom(room) {
       currentRoom = room;
       localStorage.setItem('currentRoom', currentRoom);
-      roomNameEl.textContent = room;
-      renderRoomList();
       attachRoomListener(room);
     }
 
-    // Render a single message
+    // Render message with username and timestamp
     function renderMessage(msg) {
       if (msg.type === 'system') {
         const s = document.createElement('div');
@@ -380,16 +502,20 @@
         return;
       }
       const div = document.createElement('div');
-      const isSelf = msg.sender === (currentUser || 'Anonymous');
+      const isSelf = msg.uid === uid;
       div.className = `message ${isSelf ? 'self' : 'other'}`;
+
       const name = document.createElement('div');
       name.className = 'username';
       name.textContent = msg.sender || 'Unknown';
+
       const textNode = document.createElement('div');
       textNode.textContent = msg.text || '';
+
       const ts = document.createElement('div');
       ts.className = 'timestamp';
       ts.textContent = formatTimestamp(msg.timestamp);
+
       div.appendChild(name);
       div.appendChild(textNode);
       div.appendChild(ts);
@@ -412,10 +538,11 @@
     // Send message
     function sendMessage() {
       const text = messageInput.value.trim();
-      if (!text) return;
+      if (!text || !currentUser) return;
       const payload = {
         text,
-        sender: currentUser || 'Anonymous',
+        sender: currentUser,
+        uid,
         timestamp: Date.now(),
         type: 'chat'
       };
@@ -423,36 +550,78 @@
       messageInput.value = '';
     }
 
-    // Create room (private-by-name)
-    function createRoom(room) {
-      if (!room) return;
-      if (!rooms.includes(room)) rooms.push(room);
-      localStorage.setItem('rooms', JSON.stringify(rooms));
-      renderRoomList();
-      switchRoom(room);
-      // Post system message to Firebase to mark creation locally
+    // System message
+    function postSystemMessage(room, text) {
       push(ref(db, `rooms/${room}/messages`), {
         type: 'system',
-        text: `Room "${room}" created`,
+        text,
         timestamp: Date.now()
       });
     }
 
-    // Join room (by name; becomes accessible if you know it)
-    function joinRoom(room) {
-      if (!room) return;
-      if (!rooms.includes(room)) rooms.push(room);
-      localStorage.setItem('rooms', JSON.stringify(rooms));
-      renderRoomList();
-      switchRoom(room);
-      push(ref(db, `rooms/${room}/messages`), {
-        type: 'system',
-        text: `${currentUser || 'Anonymous'} joined "${room}"`,
-        timestamp: Date.now()
+    // Create private room (visible only to creator until shared)
+    function createRoomByName(roomName) {
+      if (!roomName) return;
+      const name = roomName.trim();
+      // Create room metadata
+      set(ref(db, `rooms/${name}/meta`), {
+        owner: uid,
+        isPrivate: true,
+        createdAt: Date.now()
       });
+      // Add to creator's sidebar
+      set(ref(db, `userRooms/${uid}/${name}`), { private: true });
+      postSystemMessage(name, `Room "${name}" created`);
+      switchRoom(name);
     }
 
-    // Events
+    // Join room by name (sharing)
+    function joinRoomByName(roomName) {
+      if (!roomName) return;
+      const name = roomName.trim();
+      // Add to this user's visible rooms; keep private flag based on room meta
+      onValue(ref(db, `rooms/${name}/meta`), (snap) => {
+        const meta = snap.val() || {};
+        const isPriv = meta.isPrivate === true;
+        set(ref(db, `userRooms/${uid}/${name}`), { private: !!isPriv });
+      }, { onlyOnce: true });
+      postSystemMessage(name, `${currentUser || 'Anonymous'} joined "${name}"`);
+      switchRoom(name);
+    }
+
+    // Share room: instruct user to tell others the exact name (simple private-by-name)
+    // You can add copy-to-clipboard later.
+
+    // DND / Status drop-up
+    statusLabel.addEventListener('click', () => {
+      statusOptions.style.display = statusOptions.style.display === 'flex' ? 'none' : 'flex';
+    });
+    document.querySelectorAll('.statusOption').forEach(opt => {
+      opt.addEventListener('click', () => {
+        currentStatus = opt.dataset.status;
+        statusLabel.textContent = `Status: ${currentStatus}`;
+        statusOptions.style.display = 'none';
+        statusDot.style.backgroundColor =
+          currentStatus === 'Online' ? '#00FF00' :
+          currentStatus === 'DND' ? 'red' : 'gray';
+        // Update presence for current room
+        set(ref(db, `presence/${currentRoom}/${uid}`), {
+          status: currentStatus,
+          username: currentUser || 'Anonymous',
+          ts: Date.now()
+        });
+        postSystemMessage(currentRoom, `${currentUser || 'Anonymous'} has gone ${currentStatus}`);
+      });
+    });
+
+    // Overlay closes modals
+    overlay.addEventListener('click', () => {
+      hideModal(usernameModal);
+      hideModal(roomModal);
+      hideModal(joinRoomModal);
+    });
+
+    // Buttons
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
 
@@ -462,9 +631,9 @@
       newRoomInput.focus();
     });
     createRoomBtn.addEventListener('click', () => {
-      const room = newRoomInput.value.trim();
+      const name = newRoomInput.value.trim();
       hideModal(roomModal);
-      if (room) createRoom(room);
+      if (name) createRoomByName(name);
     });
 
     joinRoomBtn.addEventListener('click', () => {
@@ -473,20 +642,17 @@
       joinRoomInput.focus();
     });
     joinRoomConfirmBtn.addEventListener('click', () => {
-      const room = joinRoomInput.value.trim();
+      const name = joinRoomInput.value.trim();
       hideModal(joinRoomModal);
-      if (room) joinRoom(room);
-    });
-
-    overlay.addEventListener('click', () => {
-      hideModal(usernameModal);
-      hideModal(roomModal);
-      hideModal(joinRoomModal);
+      if (name) joinRoomByName(name);
     });
 
     // Username setup
     function openUsernameModalIfNeeded() {
       if (!currentUser) {
+        usernameInput.value = '';
+        avatarPreview.style.background = userColor;
+        avatarPreview.textContent = '?';
         showModal(usernameModal);
         usernameInput.focus();
       } else {
@@ -497,22 +663,37 @@
       const name = (usernameInput.value || '').trim() || 'Anonymous';
       const color = colorInput.value || '#28a745';
       currentUser = name;
-      localStorage.setItem('username', currentUser);
-      localStorage.setItem('userColor', color);
       userColor = color;
+      localStorage.setItem('username', currentUser);
+      localStorage.setItem('userColor', userColor);
       hideModal(usernameModal);
       renderAvatar();
+      // Ensure General is visible to this user
+      set(ref(db, `userRooms/${uid}/General`), { private: false });
       // Announce join to current room
-      push(ref(db, `rooms/${currentRoom}/messages`), {
-        type: 'system',
-        text: `${currentUser} joined`,
-        timestamp: Date.now()
+      postSystemMessage(currentRoom, `${currentUser} joined`);
+      // Refresh presence for current room
+      set(ref(db, `presence/${currentRoom}/${uid}`), {
+        status: currentStatus,
+        username: currentUser,
+        ts: Date.now()
       });
+      onDisconnect(ref(db, `presence/${currentRoom}/${uid}`)).remove();
     });
 
     // Init
     (function init() {
-      if (!rooms.includes('general')) rooms.unshift('general');
+      // Seed General in DB if missing (metadata)
+      onValue(ref(db, `rooms/General/meta`), (snap) => {
+        if (!snap.exists()) {
+          set(ref(db, `rooms/General/meta`), {
+            owner: 'system',
+            isPrivate: false,
+            createdAt: Date.now()
+          });
+        }
+      }, { onlyOnce: true });
+
       renderRoomList();
       roomNameEl.textContent = currentRoom;
       openUsernameModalIfNeeded();
@@ -520,9 +701,9 @@
       attachRoomListener(currentRoom);
     })();
 
-    // Optional: note offline locally (not broadcast reliably on unload)
+    // Presence cleanup
     window.addEventListener('beforeunload', () => {
-      // Avoid pushing on unload to prevent network race; will add presence later.
+      // onDisconnect handles removal; we avoid pushing unload system messages to reduce race conditions.
     });
   </script>
 </body>
