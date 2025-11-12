@@ -35,6 +35,7 @@
     .username { font-size:12px; font-weight:bold; opacity:0.85; }
     .text { font-size:14px; }
     .timestamp { font-size:10px; opacity:0.65; align-self:flex-end; }
+    .editedTag { font-size:10px; opacity:0.6; margin-left:6px; }
     .system-message { text-align:center; color:#ccc; font-size:14px; margin:10px 0; animation:fadeIn 0.2s ease-out; }
     .msg-actions { display:flex; gap:8px; margin-top:6px; }
     .msg-btn { background:var(--purple); color:#fff; border:none; border-radius:20px; padding:4px 10px; font-size:12px; cursor:pointer; }
@@ -139,13 +140,13 @@
     import { getDatabase, ref, set, push, onChildAdded, onValue, onDisconnect, off, get, update, remove } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "REPLACE_ME",
+      authDomain: "REPLACE_ME",
+      databaseURL: "REPLACE_ME",
+      projectId: "REPLACE_ME",
+      storageBucket: "REPLACE_ME",
+      messagingSenderId: "REPLACE_ME",
+      appId: "REPLACE_ME"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -180,7 +181,6 @@
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    const statusBox = document.getElementById('statusBox');
     const statusLabel = document.getElementById('statusLabel');
     const statusOptions = document.getElementById('statusOptions');
     const statusDot = document.getElementById('statusDot');
@@ -200,29 +200,37 @@
 
     // Avatar rendering
     function renderAvatar(){
-      const letter = (currentUser || '?').charAt(0).toUpperCase();
+      const letter = (currentUser || 'A').charAt(0).toUpperCase();
       userAvatar.style.background = userColor;
       userAvatar.textContent = letter;
-      avatarPreview.style.background = userColor;
-      avatarPreview.textContent = letter;
+      if (avatarPreview) {
+        avatarPreview.style.background = userColor;
+        avatarPreview.textContent = letter;
+      }
     }
     usernameInput.addEventListener('input', () => {
-      const letter = (usernameInput.value || '?').charAt(0).toUpperCase();
-      avatarPreview.textContent = letter;
+      const letter = (usernameInput.value || 'A').charAt(0).toUpperCase();
+      if (avatarPreview) avatarPreview.textContent = letter;
     });
     colorInput.addEventListener('input', () => {
       userColor = colorInput.value;
-      avatarPreview.style.background = userColor;
+      if (avatarPreview) avatarPreview.style.background = userColor;
     });
+
+    // Seed General room for both metadata and user visibility
+    async function seedGeneral(){
+      await set(ref(db, `rooms/General/meta`), { owner:'system', isPrivate:false, createdAt: Date.now() });
+      await set(ref(db, `userRooms/${uid}/General`), { private:false });
+    }
 
     // Rooms visibility via userRooms/{uid}/{room}
     let userRoomsRef = null;
     function renderRoomList(){
       if (userRoomsRef) off(userRoomsRef);
       userRoomsRef = ref(db, `userRooms/${uid}`);
-      onValue(userRoomsRef, (snap)=>{
+      onValue(userRoomsRef, async (snap)=>{
         const roomsObj = snap.val() || {};
-        if (!roomsObj['General']) set(ref(db, `userRooms/${uid}/General`), { private: false });
+        if (!roomsObj['General']) { await seedGeneral(); }
         const entries = Object.entries(roomsObj).sort((a,b)=>a[0].localeCompare(b[0]));
         roomListEl.innerHTML = '';
         entries.forEach(([name, meta])=>{
@@ -289,11 +297,9 @@
     }
 
     function formatTimestamp(ts){
-      try {
-        const d = new Date(ts || Date.now());
-        const h = d.getHours(), m = d.getMinutes().toString().padStart(2,'0'), ampm = h>=12?'PM':'AM', hour12 = h%12 || 12;
-        return `${hour12}:${m} ${ampm}`;
-      } catch { return ''; }
+      const d = new Date(ts || Date.now());
+      const h = d.getHours(), m = d.getMinutes().toString().padStart(2,'0'), ampm = h>=12?'PM':'AM', hour12 = h%12 || 12;
+      return `${hour12}:${m} ${ampm}`;
     }
 
     function renderMessage(msg, key){
@@ -312,7 +318,18 @@
       const textNode = document.createElement('div'); textNode.className='text'; textNode.textContent = msg.text || '';
       const ts = document.createElement('div'); ts.className='timestamp'; ts.textContent = formatTimestamp(msg.timestamp);
 
-      div.appendChild(name); div.appendChild(textNode); div.appendChild(ts);
+      div.appendChild(name);
+      div.appendChild(textNode);
+      const tsWrap = document.createElement('div');
+      tsWrap.style.display='flex'; tsWrap.style.alignItems='center';
+      tsWrap.appendChild(ts);
+      if (msg.editedAt) {
+        const edited = document.createElement('span');
+        edited.className='editedTag';
+        edited.textContent='(edited)';
+        tsWrap.appendChild(edited);
+      }
+      div.appendChild(tsWrap);
 
       if (isSelf){
         const actions = document.createElement('div');
@@ -346,7 +363,7 @@
       chatbox.appendChild(div);
     }
 
-    // Sending guard
+    // Send
     let sending = false;
     async function sendMessage(){
       const text = messageInput.value.trim();
@@ -356,9 +373,7 @@
       try {
         await push(ref(db, `rooms/${currentRoom}/messages`), payload);
         messageInput.value = '';
-      } finally {
-        sending = false;
-      }
+      } finally { sending = false; }
     }
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', e => { if (e.key === 'Enter'){ e.preventDefault(); sendMessage(); } });
@@ -377,7 +392,7 @@
       switchRoom(name);
     }
 
-    // Join room by exact name: must exist
+    // Join room (exact name)
     async function joinRoomByName(roomName){
       const name = (roomName || '').trim();
       if (!name) return;
@@ -442,7 +457,7 @@
       if (name) joinRoomByName(name);
     });
 
-    // Settings gear: change username and update past messages across all rooms for this user
+    // Settings: rename + update past messages across rooms
     settingsGear.addEventListener('click', ()=>{
       newUsernameInput.value = '';
       showModal(settingsModal);
@@ -462,7 +477,7 @@
       // Update presence in current room
       set(ref(db, `presence/${currentRoom}/${uid}`), { status: currentStatus, username: currentUser, ts: Date.now() });
 
-      // Update sender on past messages in all rooms the user has joined
+      // Update sender on past messages in all user rooms
       const myRoomsSnap = await get(ref(db, `userRooms/${uid}`));
       const myRooms = myRoomsSnap.val() || {};
       const roomNames = Object.keys(myRooms).length ? Object.keys(myRooms) : [currentRoom];
@@ -482,15 +497,14 @@
     function openUsernameModalIfNeeded(){
       if (!currentUser){
         usernameInput.value = '';
-        avatarPreview.style.background = userColor;
-        avatarPreview.textContent = '?';
+        if (avatarPreview) { avatarPreview.style.background = userColor; avatarPreview.textContent = '?'; }
         showModal(usernameModal);
         usernameInput.focus();
       } else {
         renderAvatar();
       }
     }
-    usernameOkBtn.addEventListener('click', ()=>{
+    usernameOkBtn.addEventListener('click', async ()=>{
       const name = (usernameInput.value || '').trim() || 'Anonymous';
       const color = colorInput.value || '#28a745';
       currentUser = name; userColor = color;
@@ -498,26 +512,16 @@
       localStorage.setItem('userColor', userColor);
       hideModal(usernameModal);
       renderAvatar();
-      set(ref(db, `userRooms/${uid}/General`), { private: false });
+      await seedGeneral(); // ensure General always exists/visible
       postSystemMessage(currentRoom, `${currentUser} joined`);
       const my = ref(db, `presence/${currentRoom}/${uid}`);
       set(my, { status: currentStatus, username: currentUser, ts: Date.now() });
       onDisconnect(my).remove();
     });
 
-    // Seed General metadata
-    function seedGeneral(){
-      onValue(ref(db, `rooms/General/meta`), (snap)=>{
-        if (!snap.exists()){
-          set(ref(db, `rooms/General/meta`), { owner:'system', isPrivate:false, createdAt: Date.now() });
-        }
-      }, { onlyOnce: true });
-      set(ref(db, `userRooms/${uid}/General`), { private:false });
-    }
-
     // Init
-    (function init(){
-      seedGeneral();
+    (async function init(){
+      await seedGeneral();
       renderRoomList();
       roomNameEl.textContent = currentRoom;
       openUsernameModalIfNeeded();
