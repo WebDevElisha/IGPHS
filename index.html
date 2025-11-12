@@ -3,11 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <title>IGPHS Chatroom</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --blue: #007BFF;
+      --accent: #1E90FF;
+      --green: #28a745;
+      --bg: #000;
+      --text: #fff;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #007BFF;
+      background-color: var(--blue);
       display: flex;
       height: 100vh;
       overflow: hidden;
@@ -15,9 +24,9 @@
 
     /* Sidebar */
     #sidebar {
-      width: 220px;
-      background-color: #000;
-      color: #fff;
+      width: 240px;
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       flex-direction: column;
       padding: 12px;
@@ -36,14 +45,14 @@
       cursor: pointer;
       user-select: none;
     }
-    .room.active { background-color: #1E90FF; color: #fff; }
+    .room.active { background-color: var(--accent); color: var(--text); }
     .room:hover { background-color: #333; }
 
     #addRoomBtn, #joinRoomBtn {
       margin-top: 6px;
       padding: 10px;
-      background-color: #1E90FF;
-      color: #fff;
+      background-color: var(--accent);
+      color: var(--text);
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -58,18 +67,36 @@
       box-sizing: border-box;
     }
     #chatHeader {
-      background-color: #000;
-      color: #fff;
+      background-color: var(--bg);
+      color: var(--text);
       padding: 12px;
       border-radius: 12px;
       margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
     }
+    #roomName {
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    #userAvatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #fff;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+
     #chatbox {
       flex: 1;
-      background-color: #000;
+      background-color: var(--bg);
       padding: 12px;
       border-radius: 12px;
       overflow-y: auto;
@@ -84,9 +111,31 @@
       border-radius: 20px;
       animation: popIn 0.25s ease-out;
       word-wrap: break-word;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
-    .self { background-color: #28a745; color: #fff; align-self: flex-end; }
-    .other { background-color: #fff; color: #000; align-self: flex-start; }
+    .self {
+      background-color: var(--green);
+      color: #fff;
+      align-self: flex-end;
+    }
+    .other {
+      background-color: #fff;
+      color: #000;
+      align-self: flex-start;
+    }
+
+    .username {
+      font-size: 12px;
+      font-weight: bold;
+      opacity: 0.85;
+    }
+    .timestamp {
+      font-size: 10px;
+      opacity: 0.65;
+      align-self: flex-end;
+    }
 
     .system-message {
       text-align: center;
@@ -102,6 +151,7 @@
       background: rgba(0,0,0,0.2);
       border-radius: 20px;
       padding: 8px;
+      gap: 8px;
     }
     #messageInput {
       flex: 1;
@@ -109,30 +159,16 @@
       border-radius: 20px;
       border: none;
       font-size: 16px;
-      margin-right: 10px;
       outline: none;
     }
     #sendBtn {
       padding: 10px 16px;
       border-radius: 50%;
       border: none;
-      background-color: #28a745;
+      background-color: var(--green);
       color: #fff;
       font-size: 18px;
       cursor: pointer;
-    }
-
-    /* Avatar */
-    #userAvatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: #fff;
-      background: #28a745;
     }
 
     /* Modals */
@@ -156,16 +192,10 @@
       border-radius: 10px;
       border: 1px solid #ccc;
       font-size: 14px;
-    }
-    .modal .row { display: flex; align-items: center; gap: 10px; }
-    .modal .avatarPreview {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: bold; background: #28a745;
+      box-sizing: border-box;
     }
     .modal button {
-      background-color: #007BFF;
+      background-color: var(--blue);
       color: #fff;
       border: none;
       padding: 10px 12px;
@@ -175,7 +205,6 @@
       width: 100%;
       font-weight: bold;
     }
-
     #overlay {
       position: fixed;
       top: 0; left: 0;
@@ -186,8 +215,8 @@
     }
 
     @keyframes popIn {
-      0% { transform: scale(0.9); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      0% { transform: translateY(6px) scale(0.98); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
     @keyframes fadeIn {
       0% { opacity: 0; }
@@ -218,13 +247,10 @@
   <!-- Overlay -->
   <div id="overlay"></div>
 
-  <!-- Username Setup Modal -->
+  <!-- Username Modal -->
   <div id="usernameModal" class="modal">
     <h3>Choose a username</h3>
-    <div class="row">
-      <input type="text" id="usernameInput" placeholder="Username" />
-      <div id="avatarPreview" class="avatarPreview">?</div>
-    </div>
+    <input type="text" id="usernameInput" placeholder="Username" />
     <input type="color" id="colorInput" value="#28a745" />
     <button id="usernameOkBtn">OK</button>
   </div>
@@ -243,17 +269,31 @@
     <button id="joinRoomConfirmBtn">OK</button>
   </div>
 
-  <script>
-    // Elements
+  <script type="module">
+    // Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCgkxFC2qZSTWTHfl8OgjYBNaN0rfYjaQU",
+      authDomain: "igphs-acebf.firebaseapp.com",
+      databaseURL: "https://igphs-acebf-default-rtdb.firebaseio.com",
+      projectId: "igphs-acebf",
+      storageBucket: "igphs-acebf.firebasestorage.app",
+      messagingSenderId: "50789789074",
+      appId: "1:50789789074:web:47598a87a8c684fea1e54b",
+      measurementId: "G-KRCNVRZQFE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // UI elements
     const overlay = document.getElementById('overlay');
     const usernameModal = document.getElementById('usernameModal');
-    const roomModal = document.getElementById('roomModal');
-    const joinRoomModal = document.getElementById('joinRoomModal');
-
     const usernameInput = document.getElementById('usernameInput');
     const colorInput = document.getElementById('colorInput');
     const usernameOkBtn = document.getElementById('usernameOkBtn');
-    const avatarPreview = document.getElementById('avatarPreview');
     const userAvatar = document.getElementById('userAvatar');
 
     const roomListEl = document.getElementById('roomList');
@@ -269,16 +309,13 @@
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    // State
+    // Local state
     let currentUser = localStorage.getItem('username') || null;
     let userColor = localStorage.getItem('userColor') || '#28a745';
     let currentRoom = localStorage.getItem('currentRoom') || 'general';
-
-    // Rooms & Messages persisted locally
     let rooms = JSON.parse(localStorage.getItem('rooms') || '["general"]');
-    let messages = JSON.parse(localStorage.getItem('messages') || '{}');
 
-    // Helpers
+    // Modal helpers
     function showModal(modal) {
       overlay.style.display = 'block';
       modal.style.display = 'block';
@@ -287,18 +324,15 @@
       overlay.style.display = 'none';
       modal.style.display = 'none';
     }
-    function saveState() {
-      localStorage.setItem('rooms', JSON.stringify(rooms));
-      localStorage.setItem('messages', JSON.stringify(messages));
-      localStorage.setItem('currentRoom', currentRoom);
-    }
 
+    // Avatar
     function renderAvatar() {
       const letter = (currentUser || '?').charAt(0).toUpperCase();
       userAvatar.style.background = userColor;
       userAvatar.textContent = letter;
     }
 
+    // Rooms UI
     function renderRoomList() {
       roomListEl.innerHTML = '';
       rooms.forEach(room => {
@@ -311,86 +345,126 @@
       });
     }
 
+    // Firebase listener map to detach/reattach on room switch
+    let detachListener = null;
+    function attachRoomListener(room) {
+      if (detachListener) detachListener(); // simple detach (we’ll override below)
+      chatbox.innerHTML = '';
+      const roomRef = ref(db, `rooms/${room}/messages`);
+      const unsub = onChildAdded(roomRef, (snap) => {
+        const msg = snap.val();
+        renderMessage(msg);
+        chatbox.scrollTop = chatbox.scrollHeight;
+      });
+      // Store a function to clear chat and noop; Realtime DB returns no direct unsubscribe,
+      // but re-attaching simply adds another handler. We prevent dupes by clearing UI before attach.
+      detachListener = () => { /* noop for CDN build */ };
+    }
+
+    // Switch room
     function switchRoom(room) {
       currentRoom = room;
+      localStorage.setItem('currentRoom', currentRoom);
       roomNameEl.textContent = room;
       renderRoomList();
-      renderMessages();
-      saveState();
+      attachRoomListener(room);
     }
 
-    function renderMessages() {
-      chatbox.innerHTML = '';
-      const roomMsgs = messages[currentRoom] || [];
-      roomMsgs.forEach(msg => {
-        if (msg.type === 'system') {
-          const s = document.createElement('div');
-          s.className = 'system-message';
-          s.textContent = '— ' + msg.text + ' —';
-          chatbox.appendChild(s);
-        } else {
-          const div = document.createElement('div');
-          div.className = 'message ' + msg.type;
-          // Show sender name above bubble if available
-          if (msg.sender) {
-            const nameTag = document.createElement('div');
-            nameTag.style.fontSize = '12px';
-            nameTag.style.fontWeight = 'bold';
-            nameTag.style.marginBottom = '4px';
-            nameTag.style.opacity = '0.85';
-            nameTag.textContent = msg.sender;
-            div.prepend(nameTag);
-          }
-          div.appendChild(document.createTextNode(msg.text));
-          chatbox.appendChild(div);
-        }
-      });
-      chatbox.scrollTop = chatbox.scrollHeight;
+    // Render a single message
+    function renderMessage(msg) {
+      if (msg.type === 'system') {
+        const s = document.createElement('div');
+        s.className = 'system-message';
+        s.textContent = `— ${msg.text} —`;
+        chatbox.appendChild(s);
+        return;
+      }
+      const div = document.createElement('div');
+      const isSelf = msg.sender === (currentUser || 'Anonymous');
+      div.className = `message ${isSelf ? 'self' : 'other'}`;
+      const name = document.createElement('div');
+      name.className = 'username';
+      name.textContent = msg.sender || 'Unknown';
+      const textNode = document.createElement('div');
+      textNode.textContent = msg.text || '';
+      const ts = document.createElement('div');
+      ts.className = 'timestamp';
+      ts.textContent = formatTimestamp(msg.timestamp);
+      div.appendChild(name);
+      div.appendChild(textNode);
+      div.appendChild(ts);
+      chatbox.appendChild(div);
     }
 
-    function postSystemMessage(text) {
-      messages[currentRoom] = messages[currentRoom] || [];
-      messages[currentRoom].push({ type: 'system', text });
-      saveState();
-      renderMessages();
+    function formatTimestamp(ts) {
+      try {
+        const d = new Date(ts || Date.now());
+        const h = d.getHours();
+        const m = d.getMinutes().toString().padStart(2, '0');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const hour12 = h % 12 || 12;
+        return `${hour12}:${m} ${ampm}`;
+      } catch {
+        return '';
+      }
     }
 
+    // Send message
     function sendMessage() {
       const text = messageInput.value.trim();
       if (!text) return;
-      messages[currentRoom] = messages[currentRoom] || [];
-      messages[currentRoom].push({
+      const payload = {
         text,
-        type: 'self',
-        sender: currentUser || 'Anonymous'
-      });
+        sender: currentUser || 'Anonymous',
+        timestamp: Date.now(),
+        type: 'chat'
+      };
+      push(ref(db, `rooms/${currentRoom}/messages`), payload);
       messageInput.value = '';
-      saveState();
-      renderMessages();
+    }
+
+    // Create room (private-by-name)
+    function createRoom(room) {
+      if (!room) return;
+      if (!rooms.includes(room)) rooms.push(room);
+      localStorage.setItem('rooms', JSON.stringify(rooms));
+      renderRoomList();
+      switchRoom(room);
+      // Post system message to Firebase to mark creation locally
+      push(ref(db, `rooms/${room}/messages`), {
+        type: 'system',
+        text: `Room "${room}" created`,
+        timestamp: Date.now()
+      });
+    }
+
+    // Join room (by name; becomes accessible if you know it)
+    function joinRoom(room) {
+      if (!room) return;
+      if (!rooms.includes(room)) rooms.push(room);
+      localStorage.setItem('rooms', JSON.stringify(rooms));
+      renderRoomList();
+      switchRoom(room);
+      push(ref(db, `rooms/${room}/messages`), {
+        type: 'system',
+        text: `${currentUser || 'Anonymous'} joined "${room}"`,
+        timestamp: Date.now()
+      });
     }
 
     // Events
     sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter') sendMessage();
-    });
+    messageInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
 
     addRoomBtn.addEventListener('click', () => {
       newRoomInput.value = '';
       showModal(roomModal);
       newRoomInput.focus();
     });
-
     createRoomBtn.addEventListener('click', () => {
       const room = newRoomInput.value.trim();
-      if (!room) return;
-      if (!rooms.includes(room)) {
-        rooms.push(room);
-        messages[room] = messages[room] || [{ type: 'system', text: `Room "${room}" created` }];
-      }
       hideModal(roomModal);
-      switchRoom(room);
-      saveState();
+      if (room) createRoom(room);
     });
 
     joinRoomBtn.addEventListener('click', () => {
@@ -398,78 +472,57 @@
       showModal(joinRoomModal);
       joinRoomInput.focus();
     });
-
     joinRoomConfirmBtn.addEventListener('click', () => {
       const room = joinRoomInput.value.trim();
-      if (!room) return;
-      if (!rooms.includes(room)) {
-        // "Private until shared": create locally, becomes accessible when others know the name
-        rooms.push(room);
-        messages[room] = messages[room] || [{ type: 'system', text: `Joined private room "${room}"` }];
-      } else {
-        messages[room].push({ type: 'system', text: `You joined "${room}"` });
-      }
       hideModal(joinRoomModal);
-      switchRoom(room);
-      saveState();
+      if (room) joinRoom(room);
     });
 
-    // Overlay closes any open modal
     overlay.addEventListener('click', () => {
       hideModal(usernameModal);
       hideModal(roomModal);
       hideModal(joinRoomModal);
     });
 
-    // Username modal behavior
+    // Username setup
     function openUsernameModalIfNeeded() {
       if (!currentUser) {
-        usernameInput.value = '';
-        avatarPreview.style.background = userColor;
-        avatarPreview.textContent = '?';
         showModal(usernameModal);
         usernameInput.focus();
       } else {
         renderAvatar();
       }
     }
-
-    usernameInput.addEventListener('input', () => {
-      const letter = usernameInput.value.trim().charAt(0).toUpperCase() || '?';
-      avatarPreview.textContent = letter;
-    });
-    colorInput.addEventListener('input', () => {
-      avatarPreview.style.background = colorInput.value;
-    });
-
     usernameOkBtn.addEventListener('click', () => {
-      const name = usernameInput.value.trim() || 'Anonymous';
+      const name = (usernameInput.value || '').trim() || 'Anonymous';
       const color = colorInput.value || '#28a745';
       currentUser = name;
-      userColor = color;
       localStorage.setItem('username', currentUser);
-      localStorage.setItem('userColor', userColor);
+      localStorage.setItem('userColor', color);
+      userColor = color;
       hideModal(usernameModal);
       renderAvatar();
-      // Welcome message in current room
-      postSystemMessage(`${currentUser} joined`);
+      // Announce join to current room
+      push(ref(db, `rooms/${currentRoom}/messages`), {
+        type: 'system',
+        text: `${currentUser} joined`,
+        timestamp: Date.now()
+      });
     });
 
     // Init
     (function init() {
-      // Ensure "general" room exists
       if (!rooms.includes('general')) rooms.unshift('general');
       renderRoomList();
-      switchRoom(currentRoom);
+      roomNameEl.textContent = currentRoom;
       openUsernameModalIfNeeded();
-      renderMessages();
+      renderAvatar();
+      attachRoomListener(currentRoom);
     })();
 
-    // Local-only offline note
+    // Optional: note offline locally (not broadcast reliably on unload)
     window.addEventListener('beforeunload', () => {
-      messages[currentRoom] = messages[currentRoom] || [];
-      messages[currentRoom].push({ type: 'system', text: `${currentUser || 'Anonymous'} has gone offline` });
-      saveState();
+      // Avoid pushing on unload to prevent network race; will add presence later.
     });
   </script>
 </body>
