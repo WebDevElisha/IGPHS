@@ -92,7 +92,6 @@
     </div>
   </div>
 
-  <!-- Status drop-up -->
   <div id="statusBox">
     <div id="statusLabel">Status: Online</div>
     <div id="statusOptions">
@@ -104,7 +103,6 @@
 
   <div id="overlay"></div>
 
-  <!-- Username Modal -->
   <div id="usernameModal" class="modal">
     <h3>Choose a username</h3>
     <div class="row">
@@ -115,21 +113,18 @@
     <button id="usernameOkBtn">OK</button>
   </div>
 
-  <!-- Add Room Modal -->
   <div id="roomModal" class="modal">
     <h3>Create a private room</h3>
     <input type="text" id="newRoomInput" placeholder="Room name" />
     <button id="createRoomBtn">OK</button>
   </div>
 
-  <!-- Join Room Modal -->
   <div id="joinRoomModal" class="modal">
     <h3>Join a room (exact name)</h3>
     <input type="text" id="joinRoomInput" placeholder="Room name" />
     <button id="joinRoomConfirmBtn">OK</button>
   </div>
 
-  <!-- Settings Modal -->
   <div id="settingsModal" class="modal">
     <h3>Change username</h3>
     <input type="text" id="newUsernameInput" placeholder="New username" />
@@ -214,7 +209,8 @@
       avatarPreview.textContent = letter;
     });
     colorInput.addEventListener('input', () => {
-      avatarPreview.style.background = colorInput.value;
+      userColor = colorInput.value;
+      avatarPreview.style.background = userColor;
     });
 
     // Rooms visibility via userRooms/{uid}/{room}
