@@ -7,16 +7,16 @@
 <style>
 :root{--blue:#0a74ff;--accent:#1E90FF;--green:#28a745;--bg:#000;--text:#fff;--purple:#7e3bd0}
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--blue);display:flex;height:100vh;overflow:hidden}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--blue);display:flex;height:100vh;overflow:hidden;color:#fff}
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;z-index:999}
-#sidebar{width:260px;background:var(--bg);color:var(--text);display:flex;flex-direction:column;padding:12px}
+#sidebar{width:260px;background:var(--bg);display:flex;flex-direction:column;padding:12px}
 #sidebar h2{margin:0 0 10px;font-size:16px}
 .room{padding:10px;margin-bottom:6px;background:#151515;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
-.room.active{background:var(--accent);color:#fff}
+.room.active{background:var(--accent)}
 .privateTag{font-size:10px;opacity:0.7;margin-left:8px}
 #addRoomBtn,#joinRoomBtn{margin-top:6px;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;cursor:pointer}
 #main{flex:1;display:flex;flex-direction:column;padding:12px}
-#chatHeader{background:var(--bg);color:#fff;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+#chatHeader{background:var(--bg);padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 #roomTitle{display:flex;align-items:center;gap:10px}
 #appHandle{font-weight:600}
 #roomName{font-weight:700}
@@ -24,16 +24,17 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--blue);display:
 #statusDot{width:10px;height:10px;border-radius:50%;background:#00FF00}
 #onlineCount{color:#fff}
 #userControls{display:flex;align-items:center;gap:10px}
-#userAvatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;background:var(--green)}
+#userAvatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;background:var(--green)}
 #settingsGear{cursor:pointer;font-size:18px}
-#chatbox{flex:1;background:var(--bg);padding:12px;border-radius:12px;overflow-y:auto;display:flex;flex-direction:column;color:#fff}
+#chatbox{flex:1;background:var(--bg);padding:12px;border-radius:12px;overflow-y:auto;display:flex;flex-direction:column}
 .message{max-width:72%;margin:6px 0;padding:10px 14px;border-radius:18px;display:flex;flex-direction:column;gap:4px;position:relative}
 .self{background:var(--green);color:#fff;align-self:flex-end}
 .other{background:#fff;color:#000;align-self:flex-start}
 .username{font-size:12px;font-weight:700;opacity:0.85}
-.text{font-size:14px;word-wrap:break-word}
-.timestamp{font-size:11px;opacity:0.7;align-self:flex-end}
-.editedTag{font-size:11px;opacity:0.7;margin-left:6px}
+.text{font-size:14px;word-wrap:break-word;color:#fff}
+.other .text{color:#000}
+.timestamp{font-size:11px;opacity:0.7;align-self:flex-end;color:#ddd}
+.editedTag{font-size:11px;opacity:0.7;margin-left:6px;color:#ddd}
 .system-message{text-align:center;color:#ccc;font-size:13px;margin:8px 0}
 .system-message::before,.system-message::after{content:"—";margin:0 6px;color:#777}
 .msg-actions{display:flex;gap:8px;margin-top:6px}
@@ -53,12 +54,12 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--blue);display:
 #inputArea{display:flex;margin-top:10px;background:rgba(255,255,255,0.08);border-radius:20px;padding:8px;gap:8px}
 #messageInput{flex:1;padding:10px;border-radius:20px;border:none;font-size:16px;outline:none;color:#000}
 #sendBtn{padding:10px 16px;border-radius:20px;border:none;background:var(--green);color:#fff;font-size:16px;cursor:pointer}
-#statusBox{position:fixed;bottom:10px;left:10px;background:var(--bg);color:var(--text);border:1px solid var(--accent);border-radius:10px;font-size:14px;cursor:pointer;z-index:100}
+#statusBox{position:fixed;bottom:10px;left:10px;background:var(--bg);border:1px solid var(--accent);border-radius:10px;font-size:14px;cursor:pointer;z-index:100}
 #statusLabel{padding:8px 12px}
 #statusOptions{display:none;flex-direction:column;border-top:1px solid var(--accent)}
 .statusOption{padding:8px 12px;border-top:1px solid #333;background:#111;cursor:pointer}
 .statusOption:hover{background:#222}
-.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:18px;border-radius:15px;width:360px;z-index:1000;display:none;box-shadow:0 10px 30px rgba(0,0,0,0.4)}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:18px;border-radius:15px;width:360px;z-index:1000;display:none;box-shadow:0 10px 30px rgba(0,0,0,0.4);color:#000}
 .modal h3{margin:0 0 10px}
 .modal input{width:100%;padding:10px;margin:6px 0;border-radius:10px;border:1px solid #ccc}
 .modal .row{display:flex;align-items:center;gap:10px}
@@ -73,6 +74,14 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--blue);display:
   <div id="roomList"></div>
   <button id="addRoomBtn">+ Add Room</button>
   <button id="joinRoomBtn">Join Room</button>
+  <div id="statusBox">
+    <div id="statusLabel">Status: Online</div>
+    <div id="statusOptions">
+      <div class="statusOption" data-status="Online">Online</div>
+      <div class="statusOption" data-status="DND">Do Not Disturb</div>
+      <div class="statusOption" data-status="Offline">Offline</div>
+    </div>
+  </div>
 </div>
 <div id="main">
   <div id="chatHeader">
@@ -91,14 +100,6 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--blue);display:
   <div id="inputArea">
     <input type="text" id="messageInput" placeholder="Type a message...">
     <button id="sendBtn">Send</button>
-  </div>
-</div>
-<div id="statusBox">
-  <div id="statusLabel">Status: Online</div>
-  <div id="statusOptions">
-    <div class="statusOption" data-status="Online">Online</div>
-    <div class="statusOption" data-status="DND">Do Not Disturb</div>
-    <div class="statusOption" data-status="Offline">Offline</div>
   </div>
 </div>
 <div id="usernameModal" class="modal">
@@ -129,18 +130,10 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--blue);display:
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import { getDatabase, ref, set, push, onChildAdded, onChildChanged, onChildRemoved, onValue, onDisconnect, off, get, update, remove } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
-const firebaseConfig={
-  apiKey:"AIzaSyCgkxFC2qZSTWTHfl8OgjYBNaN0rfYjaQU",
-  authDomain:"igphs-acebf.firebaseapp.com",
-  databaseURL:"https://igphs-acebf-default-rtdb.firebaseio.com",
-  projectId:"igphs-acebf",
-  storageBucket:"igphs-acebf.firebasestorage.app",
-  messagingSenderId:"50789789074",
-  appId:"1:50789789074:web:47598a87a8c684fea1e54b"
-};
+const firebaseConfig={apiKey:"AIzaSyCgkxFC2qZSTWTHfl8OgjYBNaN0rfYjaQU",authDomain:"igphs-acebf.firebaseapp.com",databaseURL:"https://igphs-acebf-default-rtdb.firebaseio.com",projectId:"igphs-acebf",storageBucket:"igphs-acebf.firebasestorage.app",messagingSenderId:"50789789074",appId:"1:50789789074:web:47598a87a8c684fea1e54b"};
 
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
+let app=null,db=null,connected=false;
+try{app=initializeApp(firebaseConfig);db=getDatabase(app);connected=true}catch(e){connected=false}
 
 const overlay=document.getElementById('overlay');
 const userAvatar=document.getElementById('userAvatar');
@@ -177,295 +170,69 @@ let currentUser=localStorage.getItem('username');if(!currentUser||!currentUser.t
 let userColor=localStorage.getItem('userColor')||'#28a745';
 let currentStatus='Online';
 let currentRoom=localStorage.getItem('currentRoom')||'General';
+let roomMsgRef=null,presenceRef=null;
 
 function showModal(m){overlay.style.display='block';m.style.display='block'}
 function hideModal(m){overlay.style.display='none';m.style.display='none'}
 function formatTime(ts){const d=new Date(ts||Date.now());const h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),amp=h>=12?'PM':'AM',hh=h%12||12;return `${hh}:${m} ${amp}`}
 function renderAvatar(){userAvatar.textContent=(currentUser||'Anonymous').trim().charAt(0).toUpperCase()||'A';userAvatar.style.background=userColor;avatarPreview.textContent=(usernameInput.value||currentUser||'A').charAt(0).toUpperCase();avatarPreview.style.background=userColor}
-function showSystem(room,text){push(ref(db,`rooms/${room}/messages`),{type:'system',text,timestamp:Date.now()})}
+function showSystem(room,text){if(connected){push(ref(db,`rooms/${room}/messages`),{type:'system',text,timestamp:Date.now()})}else{renderLocal({type:'system',text})}}
+function seedGeneralLocal(){const rooms=JSON.parse(localStorage.getItem('userRooms')||'{}');if(!rooms.General){rooms.General={private:false};localStorage.setItem('userRooms',JSON.stringify(rooms))}}
+async function seedGeneral(){if(connected){await set(ref(db,`rooms/General/meta`),{owner:'system',isPrivate:false,createdAt:Date.now()});await set(ref(db,`userRooms/${uid}/General`),{private:false})}else{seedGeneralLocal()}}
 
-async function seedGeneral(){
-  await set(ref(db,`rooms/General/meta`),{owner:'system',isPrivate:false,createdAt:Date.now()});
-  await set(ref(db,`userRooms/${uid}/General`),{private:false});
-}
+function getLocalRooms(){return JSON.parse(localStorage.getItem('userRooms')||'{}')}
+function setLocalRoom(name,priv){const rooms=getLocalRooms();rooms[name]={private:!!priv};localStorage.setItem('userRooms',JSON.stringify(rooms))}
+function renderRoomList(){roomListEl.innerHTML='';if(connected){const userRoomsRef=ref(db,`userRooms/${uid}`);onValue(userRoomsRef,async snap=>{const roomsObj=snap.val()||{};if(!roomsObj.General){await seedGeneral()}renderRooms(Object.entries(roomsObj))})}else{const roomsObj=getLocalRooms();if(!roomsObj.General){seedGeneralLocal()}renderRooms(Object.entries(roomsObj))}}
+function renderRooms(entries){entries.sort((a,b)=>a[0].localeCompare(b[0]));roomListEl.innerHTML='';entries.forEach(([name,meta])=>{const div=document.createElement('div');div.className='room'+(name===currentRoom?' active':'');const label=document.createElement('span');label.textContent=name;const privTag=document.createElement('span');privTag.className='privateTag';privTag.textContent=meta.private?'(private)':'';div.appendChild(label);div.appendChild(privTag);div.addEventListener('click',()=>switchRoom(name));roomListEl.appendChild(div)})}
 
-let userRoomsRef=null;
-function renderRoomList(){
-  if(userRoomsRef)off(userRoomsRef);
-  userRoomsRef=ref(db,`userRooms/${uid}`);
-  onValue(userRoomsRef,async(snap)=>{
-    const roomsObj=snap.val()||{};
-    if(!roomsObj.General){await seedGeneral()}
-    const entries=Object.entries(roomsObj).sort((a,b)=>a[0].localeCompare(b[0]));
-    roomListEl.innerHTML='';
-    entries.forEach(([name,meta])=>{
-      const div=document.createElement('div');
-      div.className='room'+(name===currentRoom?' active':'');
-      const label=document.createElement('span');label.textContent=name;
-      const privTag=document.createElement('span');privTag.className='privateTag';privTag.textContent=meta.private?'(private)':'';
-      div.appendChild(label);div.appendChild(privTag);
-      div.addEventListener('click',()=>switchRoom(name));
-      roomListEl.appendChild(div);
-    });
-  });
-}
-
-function updateActiveHighlight(){
-  document.querySelectorAll('.room').forEach(el=>{
-    const label=el.firstChild?.textContent||'';
-    el.classList.toggle('active',label===currentRoom);
-  });
-}
-
-let presenceRef=null;
-function attachPresence(room){
-  if(presenceRef)off(presenceRef);
-  presenceRef=ref(db,`presence/${room}`);
-  onValue(presenceRef,(snap)=>{
-    const pres=snap.val()||{};
-    const count=Object.values(pres).filter(p=>p&&(p.status==='Online'||p.status==='DND')).length;
-    onlineCountEl.textContent=`${count} online`;
-    const typingUsers=Object.values(pres).filter(p=>p&&p.typing&&p.username&&p.username!==currentUser).map(p=>p.username);
-    typingIndicator.textContent=typingUsers.length?`${typingUsers.join(', ')} is typing...`:'';
-  });
-  const my=ref(db,`presence/${room}/${uid}`);
-  set(my,{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});
-  onDisconnect(my).remove();
-}
+function attachPresence(room){if(presenceRef&&connected)off(presenceRef);if(connected){presenceRef=ref(db,`presence/${room}`);onValue(presenceRef,snap=>{const pres=snap.val()||{};const count=Object.values(pres).filter(p=>p&&(p.status==='Online'||p.status==='DND')).length;onlineCountEl.textContent=`${count} online`;const typingUsers=Object.values(pres).filter(p=>p&&p.typing&&p.username&&p.username!==currentUser).map(p=>p.username);typingIndicator.textContent=typingUsers.length?`${typingUsers.join(', ')} is typing...`:''});const my=ref(db,`presence/${room}/${uid}`);set(my,{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});onDisconnect(my).remove()}else{onlineCountEl.textContent='1 online';typingIndicator.textContent=''}}
 
 statusLabel.addEventListener('click',()=>{statusOptions.style.display=statusOptions.style.display==='flex'?'none':'flex'});
-document.querySelectorAll('.statusOption').forEach(opt=>{
-  opt.addEventListener('click',()=>{
-    const prev=currentStatus;
-    currentStatus=opt.dataset.status;
-    statusLabel.textContent=`Status: ${currentStatus}`;
-    statusOptions.style.display='none';
-    statusDot.style.backgroundColor=currentStatus==='Online'?'#00FF00':currentStatus==='DND'?'red':'gray';
-    set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});
-    if(prev!==currentStatus)showSystem(currentRoom,`${currentUser} has gone ${currentStatus}`);
-  });
-});
+document.querySelectorAll('.statusOption').forEach(opt=>{opt.addEventListener('click',()=>{const prev=currentStatus;currentStatus=opt.dataset.status;statusLabel.textContent=`Status: ${currentStatus}`;statusOptions.style.display='none';statusDot.style.backgroundColor=currentStatus==='Online'?'#00FF00':currentStatus==='DND'?'red':'gray';if(connected){set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});if(prev!==currentStatus)showSystem(currentRoom,`${currentUser} has gone ${currentStatus}`)}})});
 
 let typingTimer=null;
-messageInput.addEventListener('input',()=>{
-  set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:true,ts:Date.now()});
-  clearTimeout(typingTimer);
-  typingTimer=setTimeout(()=>{
-    set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});
-  },700);
-});
-messageInput.addEventListener('blur',()=>{
-  set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});
-});
+messageInput.addEventListener('input',()=>{if(connected){set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:true,ts:Date.now()});clearTimeout(typingTimer);typingTimer=setTimeout(()=>{set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()})},700)}});
+messageInput.addEventListener('blur',()=>{if(connected){set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()})}});
 
-overlay.addEventListener('click',()=>{
-  hideModal(usernameModal);hideModal(settingsModal);hideModal(roomModal);hideModal(joinRoomModal);
-});
+overlay.addEventListener('click',()=>{hideModal(usernameModal);hideModal(settingsModal);hideModal(roomModal);hideModal(joinRoomModal)});
 
-addRoomBtn.addEventListener('click',()=>{
-  newRoomInput.value='';showModal(roomModal);newRoomInput.focus();
-});
-createRoomBtn.addEventListener('click',async()=>{
-  const name=(newRoomInput.value||'').trim();hideModal(roomModal);
-  if(!name)return;
-  await set(ref(db,`rooms/${name}/meta`),{owner:uid,isPrivate:true,createdAt:Date.now()});
-  await set(ref(db,`userRooms/${uid}/${name}`),{private:true});
-  showSystem(name,`Room "${name}" created`);
-  switchRoom(name);
-});
+addRoomBtn.addEventListener('click',()=>{newRoomInput.value='';showModal(roomModal);newRoomInput.focus()});
+createRoomBtn.addEventListener('click',async()=>{const name=(newRoomInput.value||'').trim();hideModal(roomModal);if(!name)return;if(connected){await set(ref(db,`rooms/${name}/meta`),{owner:uid,isPrivate:true,createdAt:Date.now()});await set(ref(db,`userRooms/${uid}/${name}`),{private:true});showSystem(name,`Room "${name}" created`)}else{setLocalRoom(name,true)}switchRoom(name)});
+joinRoomBtn.addEventListener('click',()=>{joinRoomInput.value='';showModal(joinRoomModal);joinRoomInput.focus()});
+joinRoomConfirmBtn.addEventListener('click',async()=>{const name=(joinRoomInput.value||'').trim();hideModal(joinRoomModal);if(!name)return;if(connected){const metaSnap=await get(ref(db,`rooms/${name}/meta`));if(!metaSnap.exists()){showSystem(currentRoom,`Room "${name}" not found`);return}const isPriv=metaSnap.val()?.isPrivate===true;await set(ref(db,`userRooms/${uid}/${name}`),{private:!!isPriv});showSystem(name,`${currentUser} joined "${name}"`)}else{setLocalRoom(name,false)}switchRoom(name)});
 
-joinRoomBtn.addEventListener('click',()=>{
-  joinRoomInput.value='';showModal(joinRoomModal);joinRoomInput.focus();
-});
-joinRoomConfirmBtn.addEventListener('click',async()=>{
-  const name=(joinRoomInput.value||'').trim();hideModal(joinRoomModal);
-  if(!name)return;
-  const metaSnap=await get(ref(db,`rooms/${name}/meta`));
-  if(!metaSnap.exists()){showSystem(currentRoom,`Room "${name}" not found`);return;}
-  const isPriv=metaSnap.val()?.isPrivate===true;
-  await set(ref(db,`userRooms/${uid}/${name}`),{private:!!isPriv});
-  showSystem(name,`${currentUser} joined "${name}"`);
-  switchRoom(name);
-});
+settingsGear.addEventListener('click',()=>{newUsernameInput.value='';showModal(settingsModal);newUsernameInput.focus()});
+settingsOkBtn.addEventListener('click',async()=>{const oldName=currentUser;const newName=(newUsernameInput.value||'').trim();if(!newName)return;currentUser=newName;localStorage.setItem('username',currentUser);renderAvatar();hideModal(settingsModal);if(connected){showSystem(currentRoom,`${oldName} has set new username to ${currentUser}`);set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});const myRoomsSnap=await get(ref(db,`userRooms/${uid}`));const myRooms=myRoomsSnap.val()||{};const roomNames=Object.keys(myRooms).length?Object.keys(myRooms):[currentRoom];for(const r of roomNames){const msgsSnap=await get(ref(db,`rooms/${r}/messages`));msgsSnap.forEach(child=>{const val=child.val();if(val&&val.uid===uid){update(ref(db,`rooms/${r}/messages/${child.key}`),{sender:currentUser})}})}}});
 
-settingsGear.addEventListener('click',()=>{
-  newUsernameInput.value='';showModal(settingsModal);newUsernameInput.focus();
-});
-settingsOkBtn.addEventListener('click',async()=>{
-  const oldName=currentUser;
-  const newName=(newUsernameInput.value||'').trim();
-  if(!newName)return;
-  currentUser=newName;localStorage.setItem('username',currentUser);renderAvatar();hideModal(settingsModal);
-  showSystem(currentRoom,`${oldName} has set new username to ${currentUser}`);
-  set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});
-  const myRoomsSnap=await get(ref(db,`userRooms/${uid}`));
-  const myRooms=myRoomsSnap.val()||{};
-  const roomNames=Object.keys(myRooms).length?Object.keys(myRooms):[currentRoom];
-  for(const r of roomNames){
-    const msgsSnap=await get(ref(db,`rooms/${r}/messages`));
-    msgsSnap.forEach(child=>{
-      const val=child.val();
-      if(val&&val.uid===uid){update(ref(db,`rooms/${r}/messages/${child.key}`),{sender:currentUser})}
-    });
-  }
-});
+function switchRoom(room){currentRoom=room;localStorage.setItem('currentRoom',currentRoom);attachRoomListener(room);updateActiveHighlight()}
+function updateActiveHighlight(){document.querySelectorAll('.room').forEach(el=>{const label=el.firstChild?.textContent||'';el.classList.toggle('active',label===currentRoom)})}
 
-function switchRoom(room){
-  currentRoom=room;localStorage.setItem('currentRoom',currentRoom);attachRoomListener(room);updateActiveHighlight();
-}
-
-let roomMsgRef=null;
-function attachRoomListener(room){
-  if(roomMsgRef)off(roomMsgRef);
-  chatbox.innerHTML='';
-  roomNameEl.textContent=room;
-  roomMsgRef=ref(db,`rooms/${room}/messages`);
-  onChildAdded(roomMsgRef,(snap)=>{renderMessage(snap.val(),snap.key)});
-  onChildChanged(roomMsgRef,(snap)=>{updateMessage(snap.val(),snap.key)});
-  onChildRemoved(roomMsgRef,(snap)=>{removeMessage(snap.key)});
-  attachPresence(room);
-}
-
-function renderMessage(msg,key){
-  if(msg.type==='system'){
-    const s=document.createElement('div');s.className='system-message';s.textContent=msg.text;s.dataset.key=key;chatbox.appendChild(s);return;
-  }
-  const div=document.createElement('div');div.dataset.key=key;
-  const isSelf=msg.uid===uid;div.className=`message ${isSelf?'self':'other'}`;
-  const nameEl=document.createElement('div');nameEl.className='username';nameEl.textContent=msg.sender||(isSelf?currentUser:(msg.username||'Anonymous'));
-  const textEl=document.createElement('div');textEl.className='text';textEl.textContent=msg.text||'';
-  const tsEl=document.createElement('div');tsEl.className='timestamp';tsEl.textContent=formatTime(msg.timestamp);
-  div.appendChild(nameEl);div.appendChild(textEl);
-  const tsWrap=document.createElement('div');tsWrap.style.display='flex';tsWrap.style.alignItems='center';tsWrap.appendChild(tsEl);
-  if(msg.editedAt){const edited=document.createElement('span');edited.className='editedTag';edited.textContent='(edited)';tsWrap.appendChild(edited)}
-  div.appendChild(tsWrap);
-
-  const seen=Array.isArray(msg.seenBy)?msg.seenBy.filter(u=>u!==msg.uid):[];
-  if(seen.length){const seenEl=document.createElement('div');seenEl.className='seenBy';seenEl.textContent=`Seen by ${seen.length} ${seen.length===1?'person':'people'}`;div.appendChild(seenEl)}
-
-  const reactBar=document.createElement('div');reactBar.className='reaction-bar';
-  if(msg.reactions){Object.entries(msg.reactions).forEach(([emoji,uids])=>{if(Array.isArray(uids)&&uids.length){const pill=document.createElement('span');pill.className='reaction-pill';pill.innerHTML=`<span class="emoji">${emoji}</span> ${uids.length}`;reactBar.appendChild(pill)}})}
-  const addBtn=document.createElement('button');addBtn.className='reaction-add-btn';addBtn.textContent='😊';addBtn.addEventListener('click',()=>showEmojiPicker(key,addBtn));
-  reactBar.appendChild(addBtn);div.appendChild(reactBar);
-
-  if(isSelf){
-    const actions=document.createElement('div');actions.className='msg-actions';
-    const editBtn=document.createElement('button');editBtn.className='msg-btn';editBtn.textContent='Edit';
-    editBtn.addEventListener('click',async()=>{
-      const newText=prompt('Edit your message:',msg.text||'');if(newText==null)return;const trimmed=newText.trim();if(!trimmed)return;
-      await update(ref(db,`rooms/${currentRoom}/messages/${key}`),{text:trimmed,editedAt:Date.now(),sender:currentUser,uid});
-    });
-    const delBtn=document.createElement('button');delBtn.className='msg-btn';delBtn.textContent='Delete';
-    delBtn.addEventListener('click',async()=>{
-      const ok=confirm('Delete this message?');if(!ok)return;await remove(ref(db,`rooms/${currentRoom}/messages/${key}`));
-    });
-    actions.appendChild(editBtn);actions.appendChild(delBtn);div.appendChild(actions);
-  }
-
-  chatbox.appendChild(div);
-  chatbox.scrollTop=chatbox.scrollHeight;
-}
-
-function updateMessage(val,key){
-  const msgDiv=[...chatbox.children].find(div=>div.dataset&&div.dataset.key===key);if(!msgDiv)return;
-  if(val.type==='system'){msgDiv.textContent=val.text||'';return;}
-  const textEl=msgDiv.querySelector('.text');if(textEl)textEl.textContent=val.text||'';
-  const tsEl=msgDiv.querySelector('.timestamp');if(tsEl)tsEl.textContent=formatTime(val.timestamp);
-  if(val.editedAt){let editedTag=msgDiv.querySelector('.editedTag');if(!editedTag){editedTag=document.createElement('span');editedTag.className='editedTag';editedTag.textContent='(edited)';tsEl.parentElement.appendChild(editedTag)}}
-  const reactBar=msgDiv.querySelector('.reaction-bar');
-  if(reactBar){
-    reactBar.querySelectorAll('.reaction-pill').forEach(n=>n.remove());
-    if(val.reactions){Object.entries(val.reactions).forEach(([emoji,uids])=>{if(Array.isArray(uids)&&uids.length){const pill=document.createElement('span');pill.className='reaction-pill';pill.innerHTML=`<span class="emoji">${emoji}</span> ${uids.length}`;reactBar.insertBefore(pill,reactBar.querySelector('.reaction-add-btn'))}})}
-  }
-  const existingSeen=msgDiv.querySelector('.seenBy');
-  const seen=Array.isArray(val.seenBy)?val.seenBy.filter(u=>u!==val.uid):[];
-  if(existingSeen){if(seen.length){existingSeen.textContent=`Seen by ${seen.length} ${seen.length===1?'person':'people'}`}else{existingSeen.remove()}}
-  else if(seen.length){const seenEl=document.createElement('div');seenEl.className='seenBy';seenEl.textContent=`Seen by ${seen.length} ${seen.length===1?'person':'people'}`;msgDiv.appendChild(seenEl)}
-}
-
-function removeMessage(key){
-  const msgDiv=[...chatbox.children].find(div=>div.dataset&&div.dataset.key===key);if(msgDiv)msgDiv.remove();
-}
+function renderMessage(msg,key){if(msg.type==='system'){const s=document.createElement('div');s.className='system-message';s.textContent=msg.text;s.dataset.key=key;chatbox.appendChild(s);return}const div=document.createElement('div');div.dataset.key=key;const isSelf=msg.uid===uid;div.className=`message ${isSelf?'self':'other'}`;const nameEl=document.createElement('div');nameEl.className='username';nameEl.textContent=msg.sender||(isSelf?currentUser:(msg.username||'Anonymous'));const textEl=document.createElement('div');textEl.className='text';textEl.textContent=msg.text||'';const tsEl=document.createElement('div');tsEl.className='timestamp';tsEl.textContent=formatTime(msg.timestamp);div.appendChild(nameEl);div.appendChild(textEl);const tsWrap=document.createElement('div');tsWrap.style.display='flex';tsWrap.style.alignItems='center';tsWrap.appendChild(tsEl);if(msg.editedAt){const edited=document.createElement('span');edited.className='editedTag';edited.textContent='(edited)';tsWrap.appendChild(edited)}div.appendChild(tsWrap);const seen=Array.isArray(msg.seenBy)?msg.seenBy.filter(u=>u!==msg.uid):[];if(seen.length){const seenEl=document.createElement('div');seenEl.className='seenBy';seenEl.textContent=`Seen by ${seen.length} ${seen.length===1?'person':'people'}`;div.appendChild(seenEl)}const reactBar=document.createElement('div');reactBar.className='reaction-bar';if(msg.reactions){Object.entries(msg.reactions).forEach(([emoji,uids])=>{if(Array.isArray(uids)&&uids.length){const pill=document.createElement('span');pill.className='reaction-pill';pill.innerHTML=`<span class="emoji">${emoji}</span> ${uids.length}`;reactBar.appendChild(pill)}})}const addBtn=document.createElement('button');addBtn.className='reaction-add-btn';addBtn.textContent='😊';addBtn.addEventListener('click',()=>showEmojiPicker(key,addBtn));reactBar.appendChild(addBtn);div.appendChild(reactBar);if(isSelf){const actions=document.createElement('div');actions.className='msg-actions';const editBtn=document.createElement('button');editBtn.className='msg-btn';editBtn.textContent='Edit';editBtn.addEventListener('click',async()=>{const newText=prompt('Edit your message:',msg.text||'');if(newText==null)return;const trimmed=newText.trim();if(!trimmed)return;if(connected){await update(ref(db,`rooms/${currentRoom}/messages/${key}`),{text:trimmed,editedAt:Date.now(),sender:currentUser,uid})}else{editLocalMessage(key,trimmed)}});const delBtn=document.createElement('button');delBtn.className='msg-btn';delBtn.textContent='Delete';delBtn.addEventListener('click',async()=>{const ok=confirm('Delete this message?');if(!ok)return;if(connected){await remove(ref(db,`rooms/${currentRoom}/messages/${key}`)}else{deleteLocalMessage(key)}});actions.appendChild(editBtn);actions.appendChild(delBtn);div.appendChild(actions)}chatbox.appendChild(div);chatbox.scrollTop=chatbox.scrollHeight}
+function updateMessage(val,key){const msgDiv=[...chatbox.children].find(div=>div.dataset&&div.dataset.key===key);if(!msgDiv)return;if(val.type==='system'){msgDiv.textContent=val.text||'';return}const textEl=msgDiv.querySelector('.text');if(textEl)textEl.textContent=val.text||'';const tsEl=msgDiv.querySelector('.timestamp');if(tsEl)tsEl.textContent=formatTime(val.timestamp);if(val.editedAt){let editedTag=msgDiv.querySelector('.editedTag');if(!editedTag){editedTag=document.createElement('span');editedTag.className='editedTag';editedTag.textContent='(edited)';tsEl.parentElement.appendChild(editedTag)}}const reactBar=msgDiv.querySelector('.reaction-bar');if(reactBar){reactBar.querySelectorAll('.reaction-pill').forEach(n=>n.remove());if(val.reactions){Object.entries(val.reactions).forEach(([emoji,uids])=>{if(Array.isArray(uids)&&uids.length){const pill=document.createElement('span');pill.className='reaction-pill';pill.innerHTML=`<span class="emoji">${emoji}</span> ${uids.length}`;reactBar.insertBefore(pill,reactBar.querySelector('.reaction-add-btn'))}})}}const existingSeen=msgDiv.querySelector('.seenBy');const seen=Array.isArray(val.seenBy)?val.seenBy.filter(u=>u!==val.uid):[];if(existingSeen){if(seen.length){existingSeen.textContent=`Seen by ${seen.length} ${seen.length===1?'person':'people'}`}else{existingSeen.remove()}}else if(seen.length){const seenEl=document.createElement('div');seenEl.className='seenBy';seenEl.textContent=`Seen by ${seen.length} ${seen.length===1?'person':'people'}`;msgDiv.appendChild(seenEl)}}
+function removeMessage(key){const msgDiv=[...chatbox.children].find(div=>div.dataset&&div.dataset.key===key);if(msgDiv)msgDiv.remove()}
 
 const emojis=["💀","😅","💩","🥷","🤣","✌","😭","❤","🥀","💔","🔥","👀","🎉","💯","✨","🫶","🤝","🧠","🗣️","😎","🤔","😤","🥹","🥳","👍"];
-function showEmojiPicker(msgKey,anchor){
-  let picker=document.querySelector('.emoji-picker');if(picker)picker.remove();
-  picker=document.createElement('div');picker.className='emoji-picker';
-  const header=document.createElement('div');header.className='emoji-picker-header';
-  const title=document.createElement('div');title.className='emoji-picker-title';title.textContent='Reactions';
-  const close=document.createElement('button');close.className='emoji-picker-close';close.textContent='✕';close.addEventListener('click',()=>picker.remove());
-  header.appendChild(title);header.appendChild(close);picker.appendChild(header);
-  const grid=document.createElement('div');grid.className='emoji-grid';
-  emojis.forEach(e=>{
-    const item=document.createElement('div');item.className='emoji-item';item.textContent=e;
-    item.addEventListener('click',async()=>{
-      const path=`rooms/${currentRoom}/messages/${msgKey}/reactions/${e}`;
-      const snap=await get(ref(db,path));let arr=snap.val()||[];
-      if(arr.includes(uid)){arr=arr.filter(x=>x!==uid)}else{arr.push(uid)}
-      await set(ref(db,path),arr);picker.remove();
-    });
-    grid.appendChild(item);
-  });
-  picker.appendChild(grid);document.body.appendChild(picker);
-  const rect=anchor.getBoundingClientRect();const scrollY=window.scrollY||document.documentElement.scrollTop;const scrollX=window.scrollX||document.documentElement.scrollLeft;
-  picker.style.left=(rect.left+scrollX)+"px";picker.style.top=(rect.top+scrollY-picker.offsetHeight-8)+"px";picker.style.display='block';
-}
+function showEmojiPicker(msgKey,anchor){let picker=document.querySelector('.emoji-picker');if(picker)picker.remove();picker=document.createElement('div');picker.className='emoji-picker';const header=document.createElement('div');header.className='emoji-picker-header';const title=document.createElement('div');title.className='emoji-picker-title';title.textContent='Reactions';const close=document.createElement('button');close.className='emoji-picker-close';close.textContent='✕';close.addEventListener('click',()=>picker.remove());header.appendChild(title);header.appendChild(close);picker.appendChild(header);const grid=document.createElement('div');grid.className='emoji-grid';emojis.forEach(e=>{const item=document.createElement('div');item.className='emoji-item';item.textContent=e;item.addEventListener('click',async()=>{if(connected){const path=`rooms/${currentRoom}/messages/${msgKey}/reactions/${e}`;const snap=await get(ref(db,path));let arr=snap.val()||[];if(arr.includes(uid)){arr=arr.filter(x=>x!==uid)}else{arr.push(uid)}await set(ref(db,path),arr)}picker.remove()});grid.appendChild(item)});picker.appendChild(grid);document.body.appendChild(picker);const rect=anchor.getBoundingClientRect();const scrollY=window.scrollY||document.documentElement.scrollTop;const scrollX=window.scrollX||document.documentElement.scrollLeft;picker.style.left=(rect.left+scrollX)+"px";picker.style.top=(rect.top+scrollY-picker.offsetHeight-8)+"px";picker.style.display='block'}
+
+function getLocalMessages(room){const all=JSON.parse(localStorage.getItem('localMessages')||'{}');return all[room]||[]}
+function setLocalMessages(room,msgs){const all=JSON.parse(localStorage.getItem('localMessages')||'{}');all[room]=msgs;localStorage.setItem('localMessages',JSON.stringify(all))}
+function renderLocal(msg){renderMessage(msg,String(msg.timestamp))}
+function loadLocalRoom(room){chatbox.innerHTML='';getLocalMessages(room).forEach(m=>renderLocal(m))}
+function editLocalMessage(key,newText){const room=currentRoom;const msgs=getLocalMessages(room).map(m=>{if(String(m.timestamp)===String(key)){m.text=newText;m.editedAt=Date.now()}return m});setLocalMessages(room,msgs);loadLocalRoom(room)}
+function deleteLocalMessage(key){const room=currentRoom;const msgs=getLocalMessages(room).filter(m=>String(m.timestamp)!==String(key));setLocalMessages(room,msgs);loadLocalRoom(room)}
 
 let sending=false;
-async function sendMessage(){
-  const text=messageInput.value.trim();if(!text||sending)return;
-  sending=true;
-  const payload={text,sender:currentUser,uid,timestamp:Date.now(),type:'chat',seenBy:[]};
-  try{
-    await push(ref(db,`rooms/${currentRoom}/messages`),payload);
-    messageInput.value='';
-    set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});
-  } finally { sending=false }
-}
+async function sendMessage(){const text=messageInput.value.trim();if(!text||sending)return;sending=true;const payload={text,sender:currentUser,uid,timestamp:Date.now(),type:'chat',seenBy:[]};try{if(connected){await push(ref(db,`rooms/${currentRoom}/messages`),payload)}setLocalMessages(currentRoom,[...getLocalMessages(currentRoom),payload]);messageInput.value='';renderLocal(payload);if(connected){set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()})}}finally{sending=false}}
 sendBtn.addEventListener('click',sendMessage);
 messageInput.addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();sendMessage()}});
 
-function openUsernameModalIfNeeded(){
-  const has=localStorage.getItem('username');
-  if(!has||!has.trim()){
-    usernameInput.value='';
-    avatarPreview.style.background=userColor;
-    avatarPreview.textContent='?';
-    showModal(usernameModal);
-    usernameInput.focus();
-  } else {
-    renderAvatar();
-  }
-}
-usernameOkBtn.addEventListener('click',async()=>{
-  const name=(usernameInput.value||'').trim()||'Anonymous';
-  const color=colorInput.value||'#28a745';
-  currentUser=name;userColor=color;localStorage.setItem('username',currentUser);localStorage.setItem('userColor',userColor);
-  hideModal(usernameModal);renderAvatar();await seedGeneral();showSystem('General',`${currentUser} joined`);
-  const my=ref(db,`presence/${currentRoom}/${uid}`);set(my,{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});onDisconnect(my).remove();
-});
+function attachRoomListener(room){if(roomMsgRef&&connected)off(roomMsgRef);chatbox.innerHTML='';roomNameEl.textContent=room;if(connected){roomMsgRef=ref(db,`rooms/${room}/messages`);onChildAdded(roomMsgRef,snap=>{renderMessage(snap.val(),snap.key)});onChildChanged(roomMsgRef,snap=>{updateMessage(snap.val(),snap.key)});onChildRemoved(roomMsgRef,snap=>{removeMessage(snap.key)})}loadLocalRoom(room);attachPresence(room);updateActiveHighlight()}
 
-function attachRoom(){
-  if(roomMsgRef)off(roomMsgRef);
-  chatbox.innerHTML='';
-  roomNameEl.textContent=currentRoom;
-  roomMsgRef=ref(db,`rooms/${currentRoom}/messages`);
-  onChildAdded(roomMsgRef,(snap)=>{renderMessage(snap.val(),snap.key)});
-  onChildChanged(roomMsgRef,(snap)=>{updateMessage(snap.val(),snap.key)});
-  onChildRemoved(roomMsgRef,(snap)=>{removeMessage(snap.key)});
-  attachPresence(currentRoom);updateActiveHighlight();
-}
+function openUsernameModalIfNeeded(){const has=localStorage.getItem('username');if(!has||!has.trim()){usernameInput.value='';avatarPreview.style.background=userColor;avatarPreview.textContent='?';showModal(usernameModal);usernameInput.focus()}else{renderAvatar()}}
+usernameOkBtn.addEventListener('click',async()=>{const name=(usernameInput.value||'').trim()||'Anonymous';const color=colorInput.value||'#28a745';currentUser=name;userColor=color;localStorage.setItem('username',currentUser);localStorage.setItem('userColor',userColor);hideModal(usernameModal);renderAvatar();await seedGeneral();showSystem('General',`${currentUser} joined`);if(connected){const my=ref(db,`presence/${currentRoom}/${uid}`);set(my,{status:currentStatus,username:currentUser,typing:false,ts:Date.now()});onDisconnect(my).remove()}});
 
-let roomMsgRef=null;
-(async function init(){
-  renderAvatar();
-  await seedGeneral();
-  renderRoomList();
-  openUsernameModalIfNeeded();
-  attachRoom();
-  statusLabel.textContent=`Status: ${currentStatus}`;
-  statusDot.style.backgroundColor='#00FF00';
-})();
+(async function init(){renderAvatar();await seedGeneral();renderRoomList();openUsernameModalIfNeeded();attachRoomListener(currentRoom);statusLabel.textContent=`Status: ${currentStatus}`;statusDot.style.backgroundColor='#00FF00'})();
+
 </script>
 </body>
 </html>
