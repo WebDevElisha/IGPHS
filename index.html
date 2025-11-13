@@ -129,18 +129,18 @@ body{margin:0;font-family:Arial,sans-serif;background:var(--blue);display:flex;h
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import { getDatabase, ref, set, push, onChildAdded, onChildChanged, onChildRemoved, onValue, onDisconnect, off, get, update, remove } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCgkxFC2qZSTWTHfl8OgjYBNaN0rfYjaQU",
-  authDomain: "igphs-acebf.firebaseapp.com",
-  databaseURL: "https://igphs-acebf-default-rtdb.firebaseio.com",
-  projectId: "igphs-acebf",
-  storageBucket: "igphs-acebf.firebasestorage.app",
-  messagingSenderId: "50789789074",
-  appId: "1:50789789074:web:47598a87a8c684fea1e54b"
+const firebaseConfig={
+  apiKey:"AIzaSyCgkxFC2qZSTWTHfl8OgjYBNaN0rfYjaQU",
+  authDomain:"igphs-acebf.firebaseapp.com",
+  databaseURL:"https://igphs-acebf-default-rtdb.firebaseio.com",
+  projectId:"igphs-acebf",
+  storageBucket:"igphs-acebf.firebasestorage.app",
+  messagingSenderId:"50789789074",
+  appId:"1:50789789074:web:47598a87a8c684fea1e54b"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
 
 const overlay=document.getElementById('overlay');
 const userAvatar=document.getElementById('userAvatar');
@@ -152,7 +152,6 @@ const joinRoomBtn=document.getElementById('joinRoomBtn');
 const chatbox=document.getElementById('chatbox');
 const messageInput=document.getElementById('messageInput');
 const sendBtn=document.getElementById('sendBtn');
-const statusBox=document.getElementById('statusBox');
 const statusLabel=document.getElementById('statusLabel');
 const statusOptions=document.getElementById('statusOptions');
 const statusDot=document.getElementById('statusDot');
@@ -185,7 +184,10 @@ function formatTime(ts){const d=new Date(ts||Date.now());const h=d.getHours(),m=
 function renderAvatar(){userAvatar.textContent=(currentUser||'Anonymous').trim().charAt(0).toUpperCase()||'A';userAvatar.style.background=userColor;avatarPreview.textContent=(usernameInput.value||currentUser||'A').charAt(0).toUpperCase();avatarPreview.style.background=userColor}
 function showSystem(room,text){push(ref(db,`rooms/${room}/messages`),{type:'system',text,timestamp:Date.now()})}
 
-async function seedGeneral(){await set(ref(db,`rooms/General/meta`),{owner:'system',isPrivate:false,createdAt:Date.now()});await set(ref(db,`userRooms/${uid}/General`),{private:false})}
+async function seedGeneral(){
+  await set(ref(db,`rooms/General/meta`),{owner:'system',isPrivate:false,createdAt:Date.now()});
+  await set(ref(db,`userRooms/${uid}/General`),{private:false});
+}
 
 let userRoomsRef=null;
 function renderRoomList(){
@@ -416,7 +418,7 @@ let sending=false;
 async function sendMessage(){
   const text=messageInput.value.trim();if(!text||sending)return;
   sending=true;
-  const payload={text, sender:currentUser, uid, timestamp:Date.now(), type:'chat', seenBy:[]};
+  const payload={text,sender:currentUser,uid,timestamp:Date.now(),type:'chat',seenBy:[]};
   try{await push(ref(db,`rooms/${currentRoom}/messages`),payload);messageInput.value='';set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser,typing:false,ts:Date.now()})}
   finally{sending=false}
 }
@@ -424,23 +426,9 @@ async function sendMessage(){
 sendBtn.addEventListener('click',sendMessage);
 messageInput.addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();sendMessage()}});
 
-function markSeen(key){
-  const msgRef=ref(db,`rooms/${currentRoom}/messages/${key}/seenBy`);
-  get(msgRef).then(snap=>{let arr=snap.val()||[];if(!arr.includes(uid)){arr.push(uid);set(msgRef,arr)}});
-}
-let seenTimer=null;
-chatbox.addEventListener('scroll',()=>{
-  clearTimeout(seenTimer);
-  seenTimer=setTimeout(()=>{
-    const messages=[...chatbox.children].slice(-30);
-    messages.forEach(el=>{
-      const key=el.dataset?.key;if(!key)return;const isSelf=el.classList.contains('self');if(!isSelf)markSeen(key);
-    });
-  },200);
-});
-
 function openUsernameModalIfNeeded(){
-  if(!localStorage.getItem('username')){usernameInput.value='';avatarPreview.style.background=userColor;avatarPreview.textContent='?';showModal(usernameModal);usernameInput.focus()}else{renderAvatar()}
+  const has=localStorage.getItem('username');
+  if(!has||!has.trim()){usernameInput.value='';avatarPreview.style.background=userColor;avatarPreview.textContent='?';showModal(usernameModal);usernameInput.focus()}
 }
 usernameOkBtn.addEventListener('click',async()=>{
   const name=(usernameInput.value||'').trim()||'Anonymous';const color=colorInput.value||'#28a745';
@@ -464,6 +452,7 @@ let roomMsgRef=null;
   renderAvatar();
   await seedGeneral();
   renderRoomList();
+  openUsernameModalIfNeeded();
   attachRoom();
   statusLabel.textContent=`Status: ${currentStatus}`;
   statusDot.style.backgroundColor='#00FF00';
