@@ -2,187 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>IGPHS Chatroom</title>
+  <title>IGPHS Chatroom — Baseline</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --blue: #007BFF;
-      --accent: #1E90FF;
-      --green: #28a745;
-      --bg: #000;
-      --text: #fff;
-      --danger: #ff4444;
-      --purple: #7e3bd0;
-    }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: var(--blue);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* Sidebar */
-    #sidebar {
-      width: 240px;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      padding: 12px;
-      box-sizing: border-box;
-    }
-    #sidebar h2 {
-      margin: 0 0 10px;
-      font-size: 16px;
-    }
-    .room {
-      padding: 10px;
-      margin-bottom: 6px;
-      background: #151515;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .room.active { background: var(--accent); color: var(--text); }
-    .room:hover { background: #333; }
-    .privateTag { font-size: 10px; opacity: 0.7; margin-left: 8px; }
-    #addRoomBtn, #joinRoomBtn {
-      margin-top: 6px;
-      padding: 10px;
-      background: var(--accent);
-      color: var(--text);
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    /* Main */
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 12px;
-      box-sizing: border-box;
-    }
-    #chatHeader {
-      background: var(--bg);
-      color: var(--text);
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-    #roomTitle { display: flex; align-items: center; gap: 10px; }
-    #appHandle { color: #fff; font-weight: bold; margin-right: 10px; }
-    #roomName { font-weight: bold; letter-spacing: 0.4px; }
-    #onlineStatus { display: flex; align-items: center; gap: 6px; font-size: 13px; opacity: 0.9; margin-left: 12px; }
-    #statusDot { width: 10px; height: 10px; border-radius: 50%; background: #00FF00; }
-    #onlineCount { color: #fff; }
-    #userControls { display: flex; align-items: center; gap: 10px; }
-    #userAvatar {
-      width: 32px; height: 32px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: bold; color: #fff; background: var(--green);
-    }
-    #settingsGear { cursor: pointer; font-size: 18px; }
-
-    /* Chatbox */
-    #chatbox {
-      flex: 1;
-      background: var(--bg);
-      padding: 12px;
-      border-radius: 12px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
-    .message {
-      max-width: 72%;
-      margin: 6px 0;
-      padding: 10px 14px;
-      border-radius: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      position: relative;
-    }
-    .self { background: var(--green); color: #fff; align-self: flex-end; }
-    .other { background: #fff; color: #000; align-self: flex-start; }
-    .username { font-size: 12px; font-weight: bold; opacity: 0.85; }
-    .text { font-size: 14px; word-wrap: break-word; }
-    .timestamp { font-size: 10px; opacity: 0.65; align-self: flex-end; }
-    .editedTag { font-size: 10px; opacity: 0.6; margin-left: 6px; }
-
-    /* System messages (centered with em-dashes) */
-    .system-message { text-align: center; color: #ccc; font-size: 13px; margin: 8px 0; }
-    .system-message::before, .system-message::after { content: "—"; margin: 0 6px; color: #777; }
-
-    /* Actions + reactions */
-    .msg-actions { display: flex; gap: 8px; margin-top: 6px; }
-    .msg-btn { background: var(--purple); color: #fff; border: none; border-radius: 20px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
-    .msg-btn:hover { filter: brightness(0.95); }
-
-    .reaction-bar { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
-    .reaction-pill { background: #222; color: #fff; border-radius: 14px; padding: 2px 8px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-    .reaction-pill .emoji { font-size: 16px; }
-    .reaction-add-btn { background: #333; color: #fff; border: none; border-radius: 14px; padding: 2px 8px; cursor: pointer; font-size: 13px; }
-
-    /* Emoji picker (expanded with close) */
-    .emoji-picker {
-      position: absolute; background: #111; color: #fff; border: 1px solid #333;
-      border-radius: 10px; padding: 8px; display: none; z-index: 2000;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4); min-width: 220px;
-    }
-    .emoji-picker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .emoji-picker-title { font-size: 12px; opacity: 0.8; }
-    .emoji-picker-close { color: #fff; background: transparent; border: none; font-size: 14px; cursor: pointer; }
-    .emoji-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-    .emoji-item { font-size: 20px; cursor: pointer; padding: 6px; border-radius: 8px; text-align: center; }
-    .emoji-item:hover { background: #222; }
-
-    /* Typing + input */
-    #typingIndicator { font-size: 12px; color: #ccc; margin: 6px 4px; min-height: 16px; }
-    #inputArea { display: flex; margin-top: 10px; background: rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 8px; gap: 8px; }
-    #messageInput { flex: 1; padding: 10px; border-radius: 20px; border: none; font-size: 16px; outline: none; }
-    #sendBtn { padding: 10px 16px; border-radius: 20px; border: none; background: var(--green); color: #fff; font-size: 16px; cursor: pointer; }
-
-    /* Status drop-up */
-    #statusBox {
-      position: fixed; bottom: 10px; left: 10px; background: var(--bg); color: var(--text);
-      border: 1px solid var(--accent); border-radius: 10px; font-size: 14px; cursor: pointer; z-index: 100;
-    }
-    #statusLabel { padding: 8px 12px; }
-    #statusOptions { display: none; flex-direction: column; border-top: 1px solid var(--accent); }
-    .statusOption { padding: 8px 12px; border-top: 1px solid #333; background: #111; }
-    .statusOption:hover { background: #222; }
-
-    /* Modals */
-    .modal {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: #fff; padding: 18px; border-radius: 15px; width: 360px; z-index: 1000;
-      display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
-    .modal h3 { margin: 0 0 10px; }
-    .modal input { width: 100%; padding: 10px; margin: 6px 0; border-radius: 10px; border: 1px solid #ccc; }
-    .modal .row { display: flex; align-items: center; gap: 10px; }
-    .modal .avatarPreview {
-      width: 36px; height: 36px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; background: var(--green);
-    }
-    .modal button {
-      background: var(--blue); color: #fff; border: none; padding: 10px 12px; border-radius: 10px;
-      cursor: pointer; margin-top: 10px; width: 100%; font-weight: bold;
-    }
-
-    /* Overlay */
-    #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+    :root { --blue:#007BFF; --accent:#1E90FF; --green:#28a745; --bg:#000; --text:#fff; }
+    body { margin:0; font-family:Arial,sans-serif; background:var(--blue); display:flex; height:100vh; overflow:hidden; }
+    #sidebar { width:240px; background:var(--bg); color:var(--text); padding:12px; box-sizing:border-box; display:flex; flex-direction:column; }
+    #sidebar h2 { margin:0 0 10px; font-size:16px; }
+    .room { padding:10px; margin-bottom:6px; background:#151515; border-radius:10px; cursor:pointer; }
+    .room.active { background:var(--accent); }
+    #addRoomBtn,#joinRoomBtn { margin-top:6px; padding:10px; background:var(--accent); color:#fff; border:none; border-radius:10px; cursor:pointer; }
+    #main { flex:1; display:flex; flex-direction:column; padding:12px; box-sizing:border-box; }
+    #chatHeader { background:var(--bg); color:#fff; padding:12px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+    #roomTitle { display:flex; align-items:center; gap:10px; }
+    #userAvatar { width:32px; height:32px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+    #chatbox { flex:1; background:var(--bg); color:#fff; border-radius:12px; padding:12px; overflow-y:auto; display:flex; flex-direction:column; }
+    .message { max-width:72%; padding:8px 12px; margin:6px 0; border-radius:14px; }
+    .self { background:var(--green); align-self:flex-end; }
+    .other { background:#fff; color:#000; align-self:flex-start; }
+    .system { text-align:center; color:#ccc; margin:6px 0; }
+    #inputArea { display:flex; gap:8px; margin-top:8px; }
+    #messageInput { flex:1; padding:10px; border-radius:20px; border:none; }
+    #sendBtn { padding:10px 16px; border:none; border-radius:20px; background:var(--green); color:#fff; cursor:pointer; }
+    #statusBox { position:fixed; bottom:10px; left:10px; background:#000; color:#fff; border:1px solid var(--accent); border-radius:10px; font-size:14px; cursor:pointer; }
+    #statusLabel { padding:8px 12px; }
+    #statusOptions { display:none; flex-direction:column; border-top:1px solid var(--accent); }
+    .statusOption { padding:8px 12px; border-top:1px solid #333; background:#111; cursor:pointer; }
+    .statusOption:hover { background:#222; }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:16px; border-radius:12px; display:none; width:320px; }
+    #overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; }
   </style>
 </head>
 <body>
@@ -198,26 +46,20 @@
   <div id="main">
     <div id="chatHeader">
       <div id="roomTitle">
-        <span id="appHandle">IGPHS</span>
-        <div id="roomName">General</div>
-        <div id="onlineStatus"><div id="statusDot"></div><span id="onlineCount">0 online</span></div>
+        <strong>IGPHS</strong>
+        <span id="roomName">General</span>
       </div>
-      <div id="userControls">
-        <div id="userAvatar">?</div>
-        <div id="settingsGear" title="Settings">⚙️</div>
-      </div>
+      <div id="userAvatar">?</div>
     </div>
 
     <div id="chatbox"></div>
-    <div id="typingIndicator"></div>
 
     <div id="inputArea">
-      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <input id="messageInput" placeholder="Type a message..." />
       <button id="sendBtn">Send</button>
     </div>
   </div>
 
-  <!-- Status drop-up -->
   <div id="statusBox">
     <div id="statusLabel">Status: Online</div>
     <div id="statusOptions">
@@ -230,37 +72,12 @@
   <!-- Username Modal -->
   <div id="usernameModal" class="modal">
     <h3>Choose a username</h3>
-    <div class="row">
-      <input type="text" id="usernameInput" placeholder="Username" />
-      <div id="avatarPreview" class="avatarPreview">?</div>
-    </div>
-    <input type="color" id="colorInput" value="#28a745" />
+    <input id="usernameInput" placeholder="Username" />
     <button id="usernameOkBtn">OK</button>
-  </div>
-
-  <!-- Add Room Modal -->
-  <div id="roomModal" class="modal">
-    <h3>Create a private room</h3>
-    <input type="text" id="newRoomInput" placeholder="Room name" />
-    <button id="createRoomBtn">OK</button>
-  </div>
-
-  <!-- Join Room Modal -->
-  <div id="joinRoomModal" class="modal">
-    <h3>Join a room (exact name)</h3>
-    <input type="text" id="joinRoomInput" placeholder="Room name" />
-    <button id="joinRoomConfirmBtn">OK</button>
-  </div>
-
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="modal">
-    <h3>Change username</h3>
-    <input type="text" id="newUsernameInput" placeholder="New username" />
-    <button id="settingsOkBtn">Save</button>
   </div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-  import { getDatabase, ref, set, push, onChildAdded, onChildChanged, onChildRemoved, onValue, onDisconnect, off, get, update, remove } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+  import { getDatabase, ref, set, push, onChildAdded, onValue, onDisconnect, off, get } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCgkxFC2qZSTWTHfl8OgjYBNaN0rfYjaQU",
@@ -277,72 +94,29 @@
 
   // Elements
   const overlay = document.getElementById('overlay');
-  const userAvatar = document.getElementById('userAvatar');
-  const settingsGear = document.getElementById('settingsGear');
-
   const roomListEl = document.getElementById('roomList');
   const roomNameEl = document.getElementById('roomName');
-  const addRoomBtn = document.getElementById('addRoomBtn');
-  const joinRoomBtn = document.getElementById('joinRoomBtn');
-
+  const userAvatar = document.getElementById('userAvatar');
   const chatbox = document.getElementById('chatbox');
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
-
-  const statusBox = document.getElementById('statusBox');
+  const addRoomBtn = document.getElementById('addRoomBtn');
+  const joinRoomBtn = document.getElementById('joinRoomBtn');
   const statusLabel = document.getElementById('statusLabel');
   const statusOptions = document.getElementById('statusOptions');
-  const statusDot = document.getElementById('statusDot');
-  const onlineCountEl = document.getElementById('onlineCount');
-
   const usernameModal = document.getElementById('usernameModal');
   const usernameInput = document.getElementById('usernameInput');
   const usernameOkBtn = document.getElementById('usernameOkBtn');
-  const colorInput = document.getElementById('colorInput');
-  const avatarPreview = document.getElementById('avatarPreview');
-
-  const roomModal = document.getElementById('roomModal');
-  const newRoomInput = document.getElementById('newRoomInput');
-  const createRoomBtn = document.getElementById('createRoomBtn');
-
-  const joinRoomModal = document.getElementById('joinRoomModal');
-  const joinRoomInput = document.getElementById('joinRoomInput');
-  const joinRoomConfirmBtn = document.getElementById('joinRoomConfirmBtn');
-
-  const settingsModal = document.getElementById('settingsModal');
-  const newUsernameInput = document.getElementById('newUsernameInput');
-  const settingsOkBtn = document.getElementById('settingsOkBtn');
 
   // State
-  let uid = localStorage.getItem('uid');
-  if (!uid) { uid = 'u_' + Math.random().toString(36).slice(2,10); localStorage.setItem('uid', uid); }
-  let currentUser = localStorage.getItem('username');
-  let userColor = localStorage.getItem('userColor') || '#28a745';
-  let currentStatus = 'Online';
+  let uid = localStorage.getItem('uid'); if(!uid){ uid='u_'+Math.random().toString(36).slice(2,10); localStorage.setItem('uid',uid); }
+  let currentUser = localStorage.getItem('username'); if(!currentUser){ currentUser='Anonymous'; localStorage.setItem('username', currentUser); }
   let currentRoom = localStorage.getItem('currentRoom') || 'General';
-
-  // Ensure username present before any render
-  if (!currentUser || !currentUser.trim()) {
-    currentUser = 'Anonymous';
-    localStorage.setItem('username', currentUser);
-  }
-
-  // Utils
-  function showModal(m){ overlay.style.display='block'; m.style.display='block'; }
-  function hideModal(m){ overlay.style.display='none'; m.style.display='none'; }
-  function formatTime(ts){ const d=new Date(ts||Date.now()); const h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'),amp=h>=12?'PM':'AM',hh=h%12||12; return `${hh}:${m} ${amp}`; }
-  function showSystem(room, text){ push(ref(db,`rooms/${room}/messages`),{type:'system',text,timestamp:Date.now()}); }
+  let currentStatus = 'Online';
 
   function renderAvatar(){
-    const letter = (currentUser || 'Anonymous').trim().charAt(0).toUpperCase() || 'A';
-    userAvatar.textContent = letter;
-    userAvatar.style.background = userColor || '#28a745';
-    avatarPreview.textContent = (usernameInput.value || currentUser || 'A').charAt(0).toUpperCase();
-    avatarPreview.style.background = userColor || '#28a745';
+    userAvatar.textContent = (currentUser || 'Anonymous').charAt(0).toUpperCase();
   }
-
-  usernameInput.addEventListener('input', ()=>{ avatarPreview.textContent = (usernameInput.value || 'A').charAt(0).toUpperCase(); });
-  colorInput.addEventListener('input', ()=>{ userColor = colorInput.value; avatarPreview.style.background = userColor; });
 
   async function seedGeneral(){
     await set(ref(db, `rooms/General/meta`), { owner:'system', isPrivate:false, createdAt: Date.now() });
@@ -362,445 +136,124 @@
       entries.forEach(([name, meta])=>{
         const div = document.createElement('div');
         div.className = 'room' + (name === currentRoom ? ' active' : '');
-        const label = document.createElement('span'); label.textContent = name;
-        const privTag = document.createElement('span'); privTag.className='privateTag'; privTag.textContent = meta.private ? '(private)' : '';
-        div.appendChild(label); div.appendChild(privTag);
+        div.textContent = meta.private ? `${name} (private)` : name;
         div.addEventListener('click', ()=> switchRoom(name));
         roomListEl.appendChild(div);
       });
-      updateActiveHighlight();
-    });
-  }
-  function updateActiveHighlight(){
-    document.querySelectorAll('.room').forEach(el=>{
-      const label = el.firstChild?.textContent || '';
-      el.classList.toggle('active', label === currentRoom);
     });
   }
 
-  // Presence + status
-  let presenceRef = null;
-  function attachPresence(room){
-    if (presenceRef) off(presenceRef);
-    presenceRef = ref(db, `presence/${room}`);
-    onValue(presenceRef, (snap)=>{
-      const pres = snap.val() || {};
-      const count = Object.values(pres).filter(p=>p && (p.status==='Online'||p.status==='DND')).length;
-      onlineCountEl.textContent = `${count} online`;
-      const typingUsers = Object.values(pres).filter(p=>p && p.typing && p.username && p.username !== currentUser).map(p=>p.username);
-      typingIndicator.textContent = typingUsers.length ? `${typingUsers.join(', ')} is typing...` : '';
-    });
-    const my = ref(db, `presence/${room}/${uid}`);
-    set(my, { status: currentStatus, username: currentUser || 'Anonymous', typing:false, ts: Date.now() });
-    onDisconnect(my).remove();
-  }
-
-  statusLabel.addEventListener('click', ()=> {
-    statusOptions.style.display = statusOptions.style.display === 'flex' ? 'none' : 'flex';
-  });
-  document.querySelectorAll('.statusOption').forEach(opt=>{
-    opt.addEventListener('click', ()=>{
-      const prev = currentStatus;
-      currentStatus = opt.dataset.status;
-      statusLabel.textContent = `Status: ${currentStatus}`;
-      statusOptions.style.display = 'none';
-      statusDot.style.backgroundColor =
-        currentStatus === 'Online' ? '#00FF00' :
-        currentStatus === 'DND' ? 'red' : 'gray';
-      set(ref(db, `presence/${currentRoom}/${uid}`), { status: currentStatus, username: currentUser || 'Anonymous', typing:false, ts: Date.now() });
-      if (prev !== currentStatus) showSystem(currentRoom, `${currentUser || 'Anonymous'} has gone ${currentStatus}`);
-    });
-  });
-
-  // Typing indicator (disappears quickly when you stop)
-  let typingTimer = null;
-  messageInput.addEventListener('input', ()=>{
-    set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser||'Anonymous',typing:true,ts:Date.now()});
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(()=>{
-      set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser||'Anonymous',typing:false,ts:Date.now()});
-    }, 800);
-  });
-  messageInput.addEventListener('blur', ()=>{
-    set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser||'Anonymous',typing:false,ts:Date.now()});
-  });
-
-  // Overlay closes modals
-  overlay.addEventListener('click', ()=>{
-    hideModal(usernameModal);
-    hideModal(settingsModal);
-    hideModal(roomModal);
-    hideModal(joinRoomModal);
-  });
-
-  // Buttons
-  addRoomBtn.addEventListener('click', ()=>{
-    newRoomInput.value = '';
-    showModal(roomModal);
-    newRoomInput.focus();
-  });
-  createRoomBtn.addEventListener('click', ()=>{
-    const name = newRoomInput.value.trim();
-    hideModal(roomModal);
-    if (name) createRoomByName(name);
-  });
-
-  joinRoomBtn.addEventListener('click', ()=>{
-    joinRoomInput.value = '';
-    showModal(joinRoomModal);
-    joinRoomInput.focus();
-  });
-  joinRoomConfirmBtn.addEventListener('click', ()=>{
-    const name = joinRoomInput.value.trim();
-    hideModal(joinRoomModal);
-    if (name) joinRoomByName(name);
-  });
-
-  // Settings: rename + update past messages across rooms
-  settingsGear.addEventListener('click', ()=>{
-    newUsernameInput.value = '';
-    showModal(settingsModal);
-    newUsernameInput.focus();
-  });
-  settingsOkBtn.addEventListener('click', async ()=>{
-    const oldName = currentUser || 'Anonymous';
-    const newName = (newUsernameInput.value || '').trim();
-    if (!newName) return;
-
-    currentUser = newName;
-    localStorage.setItem('username', currentUser);
-    renderAvatar();
-    hideModal(settingsModal);
-    showSystem(currentRoom, `${oldName} has set new username to ${currentUser}`);
-
-    // Update presence in current room
-    set(ref(db, `presence/${currentRoom}/${uid}`), { status: currentStatus, username: currentUser, typing:false, ts: Date.now() });
-
-    // Update sender on past messages in all rooms the user has joined
-    const myRoomsSnap = await get(ref(db, `userRooms/${uid}`));
-    const myRooms = myRoomsSnap.val() || {};
-    const roomNames = Object.keys(myRooms).length ? Object.keys(myRooms) : [currentRoom];
-
-    for (const r of roomNames) {
-      const msgsSnap = await get(ref(db, `rooms/${r}/messages`));
-      msgsSnap.forEach(child=>{
-        const val = child.val();
-        if (val && val.uid === uid) {
-          update(ref(db, `rooms/${r}/messages/${child.key}`), { sender: currentUser });
-        }
-      });
-    }
-  });
-
-  // Create private room
-  async function createRoomByName(roomName){
-    const name = (roomName || '').trim();
-    if (!name) return;
-    await set(ref(db, `rooms/${name}/meta`), { owner: uid, isPrivate: true, createdAt: Date.now() });
-    await set(ref(db, `userRooms/${uid}/${name}`), { private: true });
-    showSystem(name, `Room "${name}" created`);
-    switchRoom(name);
-  }
-
-  // Join room by exact name
-  async function joinRoomByName(roomName){
-    const name = (roomName || '').trim();
-    if (!name) return;
-    const metaSnap = await get(ref(db, `rooms/${name}/meta`));
-    if (!metaSnap.exists()){
-      showSystem(currentRoom, `Room "${name}" not found`);
-      return;
-    }
-    const meta = metaSnap.val() || {};
-    const isPriv = meta.isPrivate === true;
-    await set(ref(db, `userRooms/${uid}/${name}`), { private: !!isPriv });
-    showSystem(name, `${currentUser || 'Anonymous'} joined "${name}"`);
-    switchRoom(name);
-  }
-
-  // Switch room
-  function switchRoom(room){
-    currentRoom = room;
-    localStorage.setItem('currentRoom', currentRoom);
-    attachRoomListener(room);
-  }
-
-  // Messages
+  // Attach messages
   let roomMsgRef = null;
-
   function attachRoomListener(room){
     if (roomMsgRef) off(roomMsgRef);
     chatbox.innerHTML = '';
     roomNameEl.textContent = room;
     roomMsgRef = ref(db, `rooms/${room}/messages`);
     onChildAdded(roomMsgRef, (snap)=>{ renderMessage(snap.val(), snap.key); });
-    onChildChanged(roomMsgRef, (snap)=>{ updateMessage(snap.val(), snap.key); });
-    onChildRemoved(roomMsgRef, (snap)=>{ removeMessage(snap.key); });
-    attachPresence(room);
-    updateActiveHighlight();
+    // Presence entry
+    const my = ref(db, `presence/${room}/${uid}`);
+    set(my, { status: currentStatus, username: currentUser, ts: Date.now() });
+    onDisconnect(my).remove();
   }
 
-  // Send message (seenBy excludes sender)
-  let sending = false;
-  async function sendMessage(){
-    const text = messageInput.value.trim();
-    if (!text || sending) return;
-    if (!currentUser){
-      showModal(usernameModal);
-      return;
-    }
-    sending = true;
-    const payload = { text, sender: currentUser, uid, timestamp: Date.now(), type: 'chat', seenBy: [] };
-    try {
-      await push(ref(db, `rooms/${currentRoom}/messages`), payload);
-      messageInput.value = '';
-      set(ref(db,`presence/${currentRoom}/${uid}`),{status:currentStatus,username:currentUser||'Anonymous',typing:false,ts:Date.now()});
-    } finally { sending = false; }
-  }
-  sendBtn.addEventListener('click', sendMessage);
-  messageInput.addEventListener('keypress', e => { if (e.key === 'Enter'){ e.preventDefault(); sendMessage(); } });
-
-  // Mark seen (exclude sender)
-  function markSeen(key){
-    const msgRef = ref(db, `rooms/${currentRoom}/messages/${key}/seenBy`);
-    get(msgRef).then(snap=>{
-      let arr = snap.val() || [];
-      if (!arr.includes(uid)) { arr.push(uid); set(msgRef, arr); }
-    });
-  }
-  // Mark recent non-self messages when scrolling
-  let seenTimer = null;
-  chatbox.addEventListener('scroll', ()=>{
-    clearTimeout(seenTimer);
-    seenTimer = setTimeout(()=>{
-      const messages = [...chatbox.children].slice(-30);
-      messages.forEach(el=>{
-        const key = el.dataset?.key;
-        if (!key) return;
-        const isSelf = el.classList.contains('self');
-        if (!isSelf) markSeen(key);
-      });
-    }, 200);
-  });
-
-  // Reactions
-  const baseEmojis = ["💀","😅","💩","🥷","🤣","✌","😭","❤","🥀","💔"];
-  const extraEmojis = ["🔥","👀","🎉","💯","✨","🫶","🤝","🧠","🗣️","😎","🤔","😤","🥹","🥳","👍"];
-  const emojis = [...baseEmojis, ...extraEmojis];
-
-  function showEmojiPicker(msgKey, anchor){
-    let picker = document.querySelector('.emoji-picker');
-    if (picker) picker.remove();
-    picker = document.createElement('div'); picker.className='emoji-picker';
-
-    const header = document.createElement('div'); header.className='emoji-picker-header';
-    const title = document.createElement('div'); title.className='emoji-picker-title'; title.textContent='Reactions';
-    const close = document.createElement('button'); close.className='emoji-picker-close'; close.textContent='✕';
-    close.addEventListener('click', ()=> picker.remove());
-    header.appendChild(title); header.appendChild(close);
-    picker.appendChild(header);
-
-    const grid = document.createElement('div'); grid.className='emoji-grid';
-    emojis.forEach(e=>{
-      const item = document.createElement('div'); item.className='emoji-item'; item.textContent=e;
-      item.addEventListener('click', async ()=>{
-        const path = `rooms/${currentRoom}/messages/${msgKey}/reactions/${e}`;
-        const snap = await get(ref(db, path));
-        let arr = snap.val() || [];
-        if (arr.includes(uid)){ arr = arr.filter(x=>x!==uid); } else { arr.push(uid); }
-        await set(ref(db, path), arr);
-        picker.remove();
-      });
-      grid.appendChild(item);
-    });
-    picker.appendChild(grid);
-    document.body.appendChild(picker);
-
-    const rect = anchor.getBoundingClientRect();
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    const scrollX = window.scrollX || document.documentElement.scrollLeft;
-    picker.style.left = (rect.left + scrollX) + "px";
-    picker.style.top = (rect.top + scrollY - picker.offsetHeight - 8) + "px";
-    picker.style.display = 'block';
-  }
-
-  // Render message
   function renderMessage(msg, key){
     if (msg.type === 'system'){
-      const s = document.createElement('div');
-      s.className = 'system-message';
-      s.textContent = msg.text;
-      s.dataset.key = key;
-      chatbox.appendChild(s);
-      return;
+      const s = document.createElement('div'); s.className='system'; s.textContent = `— ${msg.text} —`; chatbox.appendChild(s); return;
     }
     const div = document.createElement('div');
     div.dataset.key = key;
-    const isSelf = msg.uid === uid;
-    div.className = `message ${isSelf ? 'self' : 'other'}`;
-
-    // Fix “Unknown” with fallback
-    const nameEl = document.createElement('div'); 
-    nameEl.className='username'; 
-    nameEl.textContent = msg.sender || (isSelf ? (currentUser || 'Anonymous') : (msg.username || 'Anonymous'));
-
-    const textEl = document.createElement('div'); textEl.className='text'; textEl.textContent = msg.text || '';
-    const tsEl = document.createElement('div'); tsEl.className='timestamp'; tsEl.textContent = formatTime(msg.timestamp);
-    div.appendChild(nameEl);
-    div.appendChild(textEl);
-    const tsWrap = document.createElement('div'); tsWrap.style.display='flex'; tsWrap.style.alignItems='center'; tsWrap.appendChild(tsEl);
-    if (msg.editedAt){ const edited=document.createElement('span'); edited.className='editedTag'; edited.textContent='(edited)'; tsWrap.appendChild(edited); }
-    div.appendChild(tsWrap);
-
-    // Seen by (exclude sender)
-    const seen = Array.isArray(msg.seenBy) ? msg.seenBy.filter(u=>u !== msg.uid) : [];
-    if (seen.length){
-      const seenEl = document.createElement('div'); seenEl.className='seenBy';
-      seenEl.textContent = `Seen by ${seen.length} ${seen.length===1?'person':'people'}`;
-      div.appendChild(seenEl);
-    }
-
-    // Reaction bar
-    const reactBar = document.createElement('div'); reactBar.className='reaction-bar';
-    if (msg.reactions){
-      Object.entries(msg.reactions).forEach(([emoji, uids])=>{
-        if (Array.isArray(uids) && uids.length){
-          const pill = document.createElement('span');
-          pill.className='reaction-pill';
-          pill.innerHTML = `<span class="emoji">${emoji}</span> ${uids.length}`;
-          reactBar.appendChild(pill);
-        }
-      });
-    }
-    const addBtn = document.createElement('button'); addBtn.className='reaction-add-btn'; addBtn.textContent='😊';
-    addBtn.addEventListener('click', ()=> showEmojiPicker(key, addBtn));
-    reactBar.appendChild(addBtn);
-    div.appendChild(reactBar);
-
-    // Edit/Delete for self (preserve sender & uid)
-    if (isSelf){
-      const actions = document.createElement('div'); actions.className='msg-actions';
-      const editBtn = document.createElement('button'); editBtn.className='msg-btn'; editBtn.textContent='Edit';
-      editBtn.addEventListener('click', async ()=>{
-        const newText = prompt('Edit your message:', msg.text || '');
-        if (newText == null) return;
-        const trimmed = newText.trim();
-        if (!trimmed) return;
-        await update(ref(db, `rooms/${currentRoom}/messages/${key}`), { text: trimmed, editedAt: Date.now(), sender: currentUser || 'Anonymous', uid });
-      });
-      const delBtn = document.createElement('button'); delBtn.className='msg-btn'; delBtn.textContent='Delete';
-      delBtn.addEventListener('click', async ()=>{
-        const ok = confirm('Delete this message?');
-        if (!ok) return;
-        await remove(ref(db, `rooms/${currentRoom}/messages/${key}`));
-      });
-      actions.appendChild(editBtn); actions.appendChild(delBtn);
-      div.appendChild(actions);
-    }
-
+    div.className = 'message ' + (msg.uid===uid?'self':'other');
+    div.innerHTML = `<div class="username">${msg.sender || 'Anonymous'}</div><div class="text">${msg.text || ''}</div>`;
     chatbox.appendChild(div);
     chatbox.scrollTop = chatbox.scrollHeight;
   }
 
-  function updateMessage(val, key){
-    const msgDiv = [...chatbox.children].find(div => div.dataset && div.dataset.key === key);
-    if (!msgDiv) return;
-    if (val.type === 'system'){
-      msgDiv.textContent = val.text || '';
+  // Send
+  async function sendMessage(){
+    const text = messageInput.value.trim();
+    if (!text) return;
+    const payload = { text, sender: currentUser, uid, timestamp: Date.now(), type: 'chat' };
+    await push(ref(db, `rooms/${currentRoom}/messages`), payload);
+    messageInput.value = '';
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  messageInput.addEventListener('keypress', e => { if (e.key === 'Enter'){ e.preventDefault(); sendMessage(); } });
+
+  // Add room
+  addRoomBtn.addEventListener('click', async ()=>{
+    const name = prompt('New room name:');
+    if (!name) return;
+    await set(ref(db, `rooms/${name}/meta`), { owner: uid, isPrivate: true, createdAt: Date.now() });
+    await set(ref(db, `userRooms/${uid}/${name}`), { private: true });
+    switchRoom(name);
+    await push(ref(db, `rooms/${name}/messages`), { type:'system', text:`Room "${name}" created`, timestamp: Date.now() });
+  });
+
+  // Join room
+  joinRoomBtn.addEventListener('click', async ()=>{
+    const name = prompt('Join room (exact name):');
+    if (!name) return;
+    const metaSnap = await get(ref(db, `rooms/${name}/meta`));
+    if (!metaSnap.exists()){
+      await push(ref(db, `rooms/${currentRoom}/messages`), { type:'system', text:`Room "${name}" not found`, timestamp: Date.now() });
       return;
     }
-    const textEl = msgDiv.querySelector('.text'); if (textEl) textEl.textContent = val.text || '';
-    const tsEl = msgDiv.querySelector('.timestamp'); if (tsEl) tsEl.textContent = formatTime(val.timestamp);
-    if (val.editedAt){
-      let editedTag = msgDiv.querySelector('.editedTag');
-      if (!editedTag){ editedTag = document.createElement('span'); editedTag.className='editedTag'; editedTag.textContent='(edited)'; tsEl.parentElement.appendChild(editedTag); }
-    }
-    // Re-render reactions
-    const reactBar = msgDiv.querySelector('.reaction-bar');
-    if (reactBar){
-      reactBar.querySelectorAll('.reaction-pill').forEach(n=>n.remove());
-      if (val.reactions){
-        Object.entries(val.reactions).forEach(([emoji, uids])=>{
-          if (Array.isArray(uids) && uids.length){
-            const pill = document.createElement('span');
-            pill.className='reaction-pill';
-            pill.innerHTML = `<span class="emoji">${emoji}</span> ${uids.length}`;
-            reactBar.insertBefore(pill, reactBar.querySelector('.reaction-add-btn'));
-          }
-        });
-      }
-    }
-    // Re-render seen by
-    const existingSeen = msgDiv.querySelector('.seenBy');
-    const seen = Array.isArray(val.seenBy) ? val.seenBy.filter(u=>u !== val.uid) : [];
-    if (existingSeen){
-      if (seen.length){
-        existingSeen.textContent = `Seen by ${seen.length} ${seen.length===1?'person':'people'}`;
-      } else {
-        existingSeen.remove();
-      }
-    } else if (seen.length){
-      const seenEl = document.createElement('div'); seenEl.className='seenBy';
-      seenEl.textContent = `Seen by ${seen.length} ${seen.length===1?'person':'people'}`;
-      msgDiv.appendChild(seenEl);
-    }
-  }
+    const isPriv = metaSnap.val()?.isPrivate === true;
+    await set(ref(db, `userRooms/${uid}/${name}`), { private: !!isPriv });
+    switchRoom(name);
+    await push(ref(db, `rooms/${name}/messages`), { type:'system', text:`${currentUser} joined "${name}"`, timestamp: Date.now() });
+  });
 
-  function removeMessage(key){
-    const msgDiv = [...chatbox.children].find(div => div.dataset && div.dataset.key === key);
-    if (msgDiv) msgDiv.remove();
-  }
+  // Status box
+  statusLabel.addEventListener('click', ()=>{
+    statusOptions.style.display = statusOptions.style.display === 'flex' ? 'none' : 'flex';
+  });
+  document.querySelectorAll('.statusOption').forEach(opt=>{
+    opt.addEventListener('click', async ()=>{
+      currentStatus = opt.dataset.status;
+      statusLabel.textContent = `Status: ${currentStatus}`;
+      statusOptions.style.display = 'none';
+      await set(ref(db, `presence/${currentRoom}/${uid}`), { status: currentStatus, username: currentUser, ts: Date.now() });
+      await push(ref(db, `rooms/${currentRoom}/messages`), { type:'system', text:`${currentUser} has gone ${currentStatus}`, timestamp: Date.now() });
+    });
+  });
 
-  // Username setup
-  function openUsernameModalIfNeeded(){
+  // Username modal
+  function showModal(m){ overlay.style.display='block'; m.style.display='block'; }
+  function hideModal(m){ overlay.style.display='none'; m.style.display='none'; }
+  function ensureUsername(){
     if (!localStorage.getItem('username')){
-      usernameInput.value = '';
-      avatarPreview.style.background = userColor;
-      avatarPreview.textContent = '?';
       showModal(usernameModal);
       usernameInput.focus();
-    } else {
-      renderAvatar();
     }
   }
   usernameOkBtn.addEventListener('click', async ()=>{
     const name = (usernameInput.value || '').trim() || 'Anonymous';
-    const color = colorInput.value || '#28a745';
-    currentUser = name; userColor = color;
+    currentUser = name;
     localStorage.setItem('username', currentUser);
-    localStorage.setItem('userColor', userColor);
     hideModal(usernameModal);
     renderAvatar();
-    await seedGeneral();
-    showSystem('General', `${currentUser} joined`);
-    const my = ref(db, `presence/${currentRoom}/${uid}`);
-    set(my, { status: currentStatus, username: currentUser, typing:false, ts: Date.now() });
-    onDisconnect(my).remove();
+    await set(ref(db, `presence/${currentRoom}/${uid}`), { status: currentStatus, username: currentUser, ts: Date.now() });
   });
+  overlay.addEventListener('click', ()=> hideModal(usernameModal));
 
-  // Attach room listeners
-  function attachRoom(){
-    if (roomMsgRef) off(roomMsgRef);
-    chatbox.innerHTML = '';
-    roomNameEl.textContent = currentRoom;
-    roomMsgRef = ref(db, `rooms/${currentRoom}/messages`);
-    onChildAdded(roomMsgRef, (snap)=>{ renderMessage(snap.val(), snap.key); });
-    onChildChanged(roomMsgRef, (snap)=>{ updateMessage(snap.val(), snap.key); });
-    onChildRemoved(roomMsgRef, (snap)=>{ removeMessage(snap.key); });
-    attachPresence(currentRoom);
-    updateActiveHighlight();
+  // Switch room
+  function switchRoom(room){
+    currentRoom = room;
+    localStorage.setItem('currentRoom', currentRoom);
+    attachRoomListener(room);
+    renderRoomList();
   }
 
   // Init
-  let roomMsgRef = null;
   (async function init(){
     renderAvatar();
     await seedGeneral();
     renderRoomList();
-    openUsernameModalIfNeeded();
-    attachRoom();
-    statusLabel.textContent = `Status: ${currentStatus}`;
-    statusDot.style.backgroundColor = '#00FF00';
+    ensureUsername();
+    attachRoomListener(currentRoom);
   })();
 </script>
 </body>
